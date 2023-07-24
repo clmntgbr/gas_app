@@ -1,5 +1,3 @@
-import 'package:gas_app/screen/introduction/introduction.dart';
-
 import 'screen/base/base_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -25,7 +23,7 @@ class AlertingApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
         useMaterial3: true,
       ),
-      home: const IntroductionScreen(),
+      home: const BaseScreen(),
     );
   }
 }

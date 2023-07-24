@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
+import 'package:gas_app/service/gas_station_service.dart';
 import 'package:latlong2/latlong.dart';
 
 class MapScreen extends StatefulWidget {
@@ -21,9 +22,13 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   double topBarOpacity = 0.0;
   LatLng currentCenter = const LatLng(48.764977, 2.358192);
 
+  final gasStationService = GasStationService();
+
   @override
   void initState() {
     super.initState();
+
+    gasStationService.getGasStationsMap();
 
     topBarAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(

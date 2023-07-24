@@ -48,5 +48,4 @@ flutter:
 
   assets:
     - assets/login/
-    - assets/introduction/
     - assets/base/
