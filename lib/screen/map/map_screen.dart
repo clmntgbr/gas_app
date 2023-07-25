@@ -21,12 +21,13 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   final PopupController _popupLayerController = PopupController();
   final mapController = MapController();
 
-  double currentZoom = 15.0;
+  double currentZoom = 12.0;
   double topBarOpacity = 0.0;
   LatLng currentCenter = const LatLng(48.764977, 2.358192);
 
   late List<Marker> markers = [];
   final gasStationService = GasStationService();
+  String? gasStationIdOpen;
 
   @override
   void initState() {
@@ -124,28 +125,54 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                             markerCenterAnimation: const MarkerCenterAnimation(),
                             markers: markers,
                             popupController: _popupLayerController,
-                            markerTapBehavior: MarkerTapBehavior.togglePopupAndHideRest(),
-                            onPopupEvent: (event, selectedMarkers) {
-                              showModalBottomSheet(
-                                elevation: 0,
-                                barrierColor: Colors.black.withAlpha(1),
-                                backgroundColor: Colors.transparent,
-                                context: context,
-                                builder: (BuildContext context) {
-                                  debugPrint(selectedMarkers.toString());
-                                  if (selectedMarkers.isEmpty) {
-                                    return Container();
-                                  }
-                                  var marker = selectedMarkers.first;
-                                  if (marker is GasStationMarker) {
-                                    return GasStationMarkerPopup(
-                                      gasStation: marker.gasStation,
+                            // markerTapBehavior: MarkerTapBehavior.togglePopupAndHideRest(),
+                            markerTapBehavior: MarkerTapBehavior.custom(
+                              (popupSpec, popupState, popupController) => {
+                                showModalBottomSheet(
+                                  isScrollControlled: true,
+                                  elevation: 0,
+                                  barrierColor: Colors.black.withAlpha(1),
+                                  backgroundColor: Colors.transparent,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    var marker = popupSpec.marker;
+                                    if (marker is GasStationMarker) {
+                                      return GasStationMarkerPopup(
+                                        gasStation: marker.gasStation,
+                                      );
+                                    }
+                                    return const Card(
+                                      child: Text('Not a gasStation'),
                                     );
-                                  }
-                                  return Container();
-                                },
-                              );
-                            },
+                                  },
+                                )
+                              },
+                            ),
+                            // onPopupEvent: (event, selectedMarkers) {
+                            //   debugPrint(selectedMarkers.toString());
+                            //   if (selectedMarkers.isEmpty) {
+                            //     debugPrint('closing');
+                            //     return;
+                            //   }
+                            //   var marker = selectedMarkers.first;
+                            //   if (marker is GasStationMarker) {
+                            //     debugPrint('open');
+                            //     showModalBottomSheet(
+                            //       elevation: 0,
+                            //       clipBehavior: Clip.antiAlias,
+                            //       useSafeArea: true,
+                            //       barrierColor: Colors.black.withAlpha(1),
+                            //       backgroundColor: Colors.transparent,
+                            //       context: context,
+                            //       builder: (BuildContext context) {
+                            //         return GasStationMarkerPopup(
+                            //           gasStation: marker.gasStation,
+                            //         );
+                            //       },
+                            //     );
+                            //     selectedMarkers = [];
+                            //   }
+                            // },
                           ),
                         ),
                       ],

@@ -7,14 +7,21 @@ import 'package:getwidget/components/button/gf_button.dart';
 import 'package:image_network/image_network.dart';
 import 'package:indexed/indexed.dart';
 
-class GasStationMarkerPopup extends StatelessWidget {
+class GasStationMarkerPopup extends StatefulWidget {
   const GasStationMarkerPopup({Key? key, required this.gasStation}) : super(key: key);
   final GasStation gasStation;
 
   @override
+  GasStationMarkerPopupState createState() => GasStationMarkerPopupState();
+}
+
+class GasStationMarkerPopupState extends State<GasStationMarkerPopup> {
+  @override
   Widget build(BuildContext context) {
+    GasStation gasStation = widget.gasStation;
+
     return Container(
-      height: 2000,
+      height: 600,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
         color: Colors.white,
@@ -29,16 +36,17 @@ class GasStationMarkerPopup extends StatelessWidget {
                   Indexed(
                     index: 1,
                     child: Positioned(
-                      child: ImageNetwork(
-                        image: Constants.baseUrl + gasStation.imagePath,
-                        height: 225,
-                        width: MediaQuery.of(context).size.width,
-                        onTap: () {},
+                      child: ClipRRect(
                         borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(20),
                           topRight: Radius.circular(20),
                         ),
-                        fitAndroidIos: BoxFit.fitHeight,
+                        child: Image(
+                          image: const AssetImage('assets/marker/75d481da-5dd4-497e-a426-f6367685c042.jpg'),
+                          height: 225,
+                          width: MediaQuery.of(context).size.width,
+                          fit: BoxFit.fitWidth,
+                        ),
                       ),
                     ),
                   ),
@@ -81,7 +89,7 @@ class GasStationMarkerPopup extends StatelessWidget {
                                       maxLines: 2,
                                       style: const TextStyle(
                                         color: Color(0xffe7e7e7),
-                                        fontWeight: FontWeight.w400,
+                                        fontWeight: FontWeight.bold,
                                         fontSize: 15.0,
                                       ),
                                     ),
@@ -91,7 +99,7 @@ class GasStationMarkerPopup extends StatelessWidget {
                                       maxLines: 2,
                                       style: const TextStyle(
                                         color: Color(0xffe7e7e7),
-                                        fontWeight: FontWeight.w400,
+                                        fontWeight: FontWeight.bold,
                                         fontSize: 15.0,
                                       ),
                                     ),
