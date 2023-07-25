@@ -99,72 +99,57 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(0),
-        child: Column(
+    return PopupScope(
+      child: Scaffold(
+        body: Stack(
           children: [
-            Flexible(
-              child: FlutterMap(
-                mapController: mapController,
-                options: MapOptions(
-                  center: currentCenter,
-                  onTap: (_, __) => _popupLayerController.hideAllPopups(),
-                  zoom: currentZoom,
-                  onMapEvent: (mapEvent) {},
-                ),
+            Positioned.fill(
+              child: Column(
                 children: [
-                  TileLayer(
-                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    userAgentPackageName: 'dev.fleaflet.flutter_map.example',
-                  ),
-                  MarkerLayer(markers: markers),
-                  PopupMarkerLayer(
-                    options: PopupMarkerLayerOptions(
-                      markerCenterAnimation: const MarkerCenterAnimation(),
-                      selectedMarkerBuilder: (context, marker) => const Icon(
-                        Icons.gas_meter,
-                        color: Colors.blueAccent,
+                  Expanded(
+                    child: FlutterMap(
+                      options: MapOptions(
+                        center: currentCenter,
+                        onTap: (_, __) => _popupLayerController.hideAllPopups(),
+                        zoom: currentZoom,
+                        onMapEvent: (mapEvent) {},
                       ),
-                      markers: markers,
-                      popupController: _popupLayerController,
-                      popupDisplayOptions: PopupDisplayOptions(
-                        builder: (_, Marker marker) {
-                          if (marker is GasStationMarker) {
-                            return MonumentMarkerPopup(monument: marker.gasStation);
-                          }
-                          return const Card(child: Text('Not a monument'));
-                        },
-                      ),
+                      children: [
+                        TileLayer(
+                          urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                          subdomains: const ['a', 'b', 'c'],
+                        ),
+                        PopupMarkerLayer(
+                          options: PopupMarkerLayerOptions(
+                            markerCenterAnimation: const MarkerCenterAnimation(),
+                            markers: markers,
+                            popupController: _popupLayerController,
+                            markerTapBehavior: MarkerTapBehavior.togglePopupAndHideRest(),
+                            onPopupEvent: (event, selectedMarkers) {
+                              showModalBottomSheet(
+                                elevation: 0,
+                                barrierColor: Colors.black.withAlpha(1),
+                                backgroundColor: Colors.transparent,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  var marker = selectedMarkers.first;
+                                  if (marker is GasStationMarker) {
+                                    return GasStationMarkerPopup(
+                                      gasStation: marker.gasStation,
+                                    );
+                                  }
+                                  return Container();
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class MonumentMarkerPopup extends StatelessWidget {
-  const MonumentMarkerPopup({Key? key, required this.monument}) : super(key: key);
-  final GasStation monument;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 200,
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Image.network(monument.imagePath, width: 200),
-            Text(monument.id),
+            ),
           ],
         ),
       ),
