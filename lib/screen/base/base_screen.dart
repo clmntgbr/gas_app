@@ -1,4 +1,4 @@
-import 'package:gas_app/screen/favourites/favorites_screen.dart';
+import 'package:gas_app/screen/favorites/favorites_screen.dart';
 
 import '../map/map_screen.dart';
 
