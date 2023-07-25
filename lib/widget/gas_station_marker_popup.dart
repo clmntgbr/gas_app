@@ -1,9 +1,13 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../model/gas_station.dart';
 import 'package:getwidget/components/button/gf_button.dart';
 import 'package:indexed/indexed.dart';
+
+import 'get_last_gas_prices.dart';
 
 class GasStationMarkerPopup extends StatefulWidget {
   const GasStationMarkerPopup({Key? key, required this.gasStation}) : super(key: key);
@@ -19,7 +23,7 @@ class GasStationMarkerPopupState extends State<GasStationMarkerPopup> {
     GasStation gasStation = widget.gasStation;
 
     return Container(
-      height: 600,
+      height: 500,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
         color: Colors.white,
@@ -81,24 +85,60 @@ class GasStationMarkerPopupState extends State<GasStationMarkerPopup> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      '${gasStation.address.number} ${gasStation.address.street}'.replaceAll('null', '').trim(),
-                                      textAlign: TextAlign.left,
-                                      maxLines: 2,
-                                      style: const TextStyle(
-                                        color: Color(0xffe7e7e7),
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 15.0,
+                                    SizedBox(
+                                      height: 20,
+                                      child: TextButton(
+                                        style: TextButton.styleFrom(
+                                          padding: const EdgeInsets.only(left: 0, right: 0, top: 0, bottom: 0),
+                                        ),
+                                        child: Text(
+                                          '${gasStation.address.number} ${gasStation.address.street}'.replaceAll('null', '').trim(),
+                                          textAlign: TextAlign.left,
+                                          maxLines: 2,
+                                          style: const TextStyle(
+                                            color: Color(0xffe7e7e7),
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15.0,
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          if (Platform.isIOS) {
+                                            launchUrl(Uri.parse(
+                                                'https://maps.apple.com/?ll=${gasStation.address.latitude},${gasStation.address.longitude}&q=Dropped%20Pin&t=m'));
+                                          }
+                                          if (Platform.isAndroid) {
+                                            launchUrl(Uri.parse(
+                                                'https://google.com/maps/search/?query=${gasStation.address.latitude},${gasStation.address.longitude}&api=1'));
+                                          }
+                                        },
                                       ),
                                     ),
-                                    Text(
-                                      '${gasStation.address.postalCode}, ${gasStation.address.city}'.trim(),
-                                      textAlign: TextAlign.left,
-                                      maxLines: 2,
-                                      style: const TextStyle(
-                                        color: Color(0xffe7e7e7),
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 15.0,
+                                    SizedBox(
+                                      height: 20,
+                                      child: TextButton(
+                                        style: TextButton.styleFrom(
+                                          padding: const EdgeInsets.only(left: 0, right: 0, top: 0, bottom: 0),
+                                        ),
+                                        child: Text(
+                                          '${gasStation.address.postalCode}, ${gasStation.address.city}'.replaceAll('null', '').trim(),
+                                          textAlign: TextAlign.left,
+                                          maxLines: 2,
+                                          style: const TextStyle(
+                                            color: Color(0xffe7e7e7),
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15.0,
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          if (Platform.isIOS) {
+                                            launchUrl(Uri.parse(
+                                                'https://maps.apple.com/?ll=${gasStation.address.latitude},${gasStation.address.longitude}&q=Dropped%20Pin&t=m'));
+                                          }
+                                          if (Platform.isAndroid) {
+                                            launchUrl(Uri.parse(
+                                                'https://google.com/maps/search/?query=${gasStation.address.latitude},${gasStation.address.longitude}&api=1'));
+                                          }
+                                        },
                                       ),
                                     ),
                                   ],
@@ -143,10 +183,9 @@ class GasStationMarkerPopupState extends State<GasStationMarkerPopup> {
                   const Padding(
                     padding: EdgeInsets.only(bottom: 10),
                   ),
-                  Text(
-                    '${gasStation.name}',
-                    textAlign: TextAlign.left,
-                    overflow: TextOverflow.clip,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: getLastGasPrices(gasStation),
                   ),
                   Align(
                     alignment: Alignment.center,

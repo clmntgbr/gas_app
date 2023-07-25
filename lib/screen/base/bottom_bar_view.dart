@@ -147,7 +147,7 @@ class BottomBarViewState extends State<BottomBarView> with TickerProviderStateMi
                           focusColor: Colors.transparent,
                           onTap: widget.addClick,
                           child: const Icon(
-                            Icons.photo_camera,
+                            Icons.favorite_outline,
                             color: Color(0xFFFFFFFF),
                             size: 32,
                           ),
