@@ -27,7 +27,6 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
 
   late List<Marker> markers = [];
   final gasStationService = GasStationService();
-  String? gasStationIdOpen;
 
   @override
   void initState() {

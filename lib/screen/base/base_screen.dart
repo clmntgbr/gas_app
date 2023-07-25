@@ -1,3 +1,5 @@
+import 'package:gas_app/screen/favourites/favorites_screen.dart';
+
 import '../map/map_screen.dart';
 
 import 'bottom_bar_view.dart';
@@ -77,17 +79,14 @@ class BaseScreenState extends State<BaseScreen> with TickerProviderStateMixin {
         ),
         BottomBarView(
           tabIconsList: tabIconsList,
-          // addClick: () async {
-          //   await BarcodeScanner.scan().then(
-          //     (value) => Navigator.push<dynamic>(
-          //       context,
-          //       MaterialPageRoute<dynamic>(
-          //         builder: (BuildContext context) => const BaseScreen(),
-          //       ),
-          //     ),
-          //   );
-          // },
-          addClick: () {},
+          addClick: () {
+            if (!mounted) {
+              return;
+            }
+            setState(() {
+              tabBody = FavoritesScreen(animationController: animationController);
+            });
+          },
           changeIndex: (int index) {
             if (index == 0 || index == 2) {
               animationController?.reverse().then<dynamic>((data) {
@@ -98,7 +97,9 @@ class BaseScreenState extends State<BaseScreen> with TickerProviderStateMixin {
                   tabBody = MapScreen(animationController: animationController);
                 });
               });
-            } else if (index == 1 || index == 3) {
+            }
+
+            if (index == 1 || index == 3) {
               animationController?.reverse().then<dynamic>((data) {
                 if (!mounted) {
                   return;
