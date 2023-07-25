@@ -7,8 +7,8 @@ class Address {
   String? region;
   String? postalCode;
   String? country;
-  String? longitude;
-  String? latitude;
+  String longitude;
+  String latitude;
 
   Address({
     required this.uuid,

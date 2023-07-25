@@ -10,8 +10,8 @@ const storage = FlutterSecureStorage();
 class GasStationService {
   final apiService = ApiService();
 
-  Future<GetGasStationsMap> getGasStationsMap() async {
-    String url = '${Constants.baseApiUrl}${Constants.gasStationsMapEndpoint}';
+  Future<GetGasStationsMap> getGasStationsMap(double latitude, double longitude, double radius) async {
+    String url = '${Constants.baseApiUrl}${Constants.gasStationsMapEndpoint}?latitude=$latitude&longitude=$longitude&radius=$radius';
 
     debugPrint('GET $url');
 
@@ -30,10 +30,7 @@ class GasStationService {
       response.statusCode,
     );
 
-    debugPrint(model.toString());
-
     model.statusCode = response.statusCode;
-
     return model;
   }
 }

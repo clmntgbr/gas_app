@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
+import 'package:gas_app/model/gas_station.dart';
 import 'package:gas_app/service/gas_station_service.dart';
+import 'package:gas_app/widget/gas_station_marker.dart';
+import 'package:gas_app/widget/gas_station_marker_popup.dart';
 import 'package:latlong2/latlong.dart';
 
 class MapScreen extends StatefulWidget {
@@ -22,13 +25,14 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   double topBarOpacity = 0.0;
   LatLng currentCenter = const LatLng(48.764977, 2.358192);
 
+  late List<Marker> markers = [];
   final gasStationService = GasStationService();
 
   @override
   void initState() {
     super.initState();
 
-    gasStationService.getGasStationsMap();
+    getGasStationsMap(currentCenter.latitude, currentCenter.longitude, 50000);
 
     topBarAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
@@ -72,6 +76,27 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     );
   }
 
+  getGasStationsMap(double latitude, double longitude, double radius) {
+    gasStationService.getGasStationsMap(currentCenter.latitude, currentCenter.longitude, 50000).then(
+      (value) {
+        markers = [];
+        for (GasStation element in value.gasStations) {
+          markers.add(
+            addMarker(element, element.hasLowPrices),
+          );
+        }
+        setState(() {});
+      },
+    );
+  }
+
+  Marker addMarker(GasStation gasStation, bool hasLowPrices) {
+    return GasStationMarker(
+      gasStation: gasStation,
+      hasLowPrices: hasLowPrices,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,9 +118,53 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                     urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                     userAgentPackageName: 'dev.fleaflet.flutter_map.example',
                   ),
+                  MarkerLayer(markers: markers),
+                  PopupMarkerLayer(
+                    options: PopupMarkerLayerOptions(
+                      markerCenterAnimation: const MarkerCenterAnimation(),
+                      selectedMarkerBuilder: (context, marker) => const Icon(
+                        Icons.gas_meter,
+                        color: Colors.blueAccent,
+                      ),
+                      markers: markers,
+                      popupController: _popupLayerController,
+                      popupDisplayOptions: PopupDisplayOptions(
+                        builder: (_, Marker marker) {
+                          if (marker is GasStationMarker) {
+                            return MonumentMarkerPopup(monument: marker.gasStation);
+                          }
+                          return const Card(child: Text('Not a monument'));
+                        },
+                      ),
+                    ),
+                  ),
                 ],
               ),
             )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class MonumentMarkerPopup extends StatelessWidget {
+  const MonumentMarkerPopup({Key? key, required this.monument}) : super(key: key);
+  final GasStation monument;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 200,
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Image.network(monument.imagePath, width: 200),
+            Text(monument.id),
           ],
         ),
       ),
