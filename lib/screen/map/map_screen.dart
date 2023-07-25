@@ -21,7 +21,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   final PopupController _popupLayerController = PopupController();
   final mapController = MapController();
 
-  double currentZoom = 12.0;
+  double currentZoom = 15.0;
   double topBarOpacity = 0.0;
   LatLng currentCenter = const LatLng(48.764977, 2.358192);
 
@@ -132,6 +132,10 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                                 backgroundColor: Colors.transparent,
                                 context: context,
                                 builder: (BuildContext context) {
+                                  debugPrint(selectedMarkers.toString());
+                                  if (selectedMarkers.isEmpty) {
+                                    return Container();
+                                  }
                                   var marker = selectedMarkers.first;
                                   if (marker is GasStationMarker) {
                                     return GasStationMarkerPopup(
