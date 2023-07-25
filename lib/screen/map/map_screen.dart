@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
-import 'package:gas_app/model/gas_station.dart';
-import 'package:gas_app/service/gas_station_service.dart';
-import 'package:gas_app/widget/gas_station_marker.dart';
-import 'package:gas_app/widget/gas_station_marker_popup.dart';
+import '../../model/gas_station.dart';
+import '../../service/gas_station_service.dart';
+import '../../widget/gas_station_marker.dart';
+import '../../widget/gas_station_marker_popup.dart';
 import 'package:latlong2/latlong.dart';
 
 class MapScreen extends StatefulWidget {

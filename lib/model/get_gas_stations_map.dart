@@ -1,5 +1,6 @@
 import 'dart:convert';
-import 'package:gas_app/model/gas_station.dart';
+
+import 'gas_station.dart';
 
 GetGasStationsMap gasStationsMapFromJson(String str, int statusCode) => GetGasStationsMap.fromJson(json.decode(str), statusCode);
 

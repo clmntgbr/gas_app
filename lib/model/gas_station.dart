@@ -1,8 +1,9 @@
 import 'dart:convert';
-import 'package:gas_app/model/address.dart';
-import 'package:gas_app/model/gas_service.dart';
-import 'package:gas_app/model/google_place.dart';
-import 'package:gas_app/model/last_gas_price.dart';
+
+import 'address.dart';
+import 'gas_service.dart';
+import 'google_place.dart';
+import 'last_gas_price.dart';
 
 GasStation getGasStationFromJson(String str) => GasStation.fromJson(json.decode(str));
 

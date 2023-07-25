@@ -1,4 +1,4 @@
-import 'package:gas_app/screen/map/map_screen.dart';
+import '../map/map_screen.dart';
 
 import 'bottom_bar_view.dart';
 import 'menu_data.dart';

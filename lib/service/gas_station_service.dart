@@ -1,4 +1,4 @@
-import 'package:gas_app/model/get_gas_stations_map.dart';
+import '../model/get_gas_stations_map.dart';
 import '../constants.dart';
 import 'api_service.dart';
 import 'package:flutter/material.dart';
