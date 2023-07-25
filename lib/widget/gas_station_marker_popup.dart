@@ -1,10 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import '../constants.dart';
 import '../model/gas_station.dart';
 import 'package:getwidget/components/button/gf_button.dart';
-import 'package:image_network/image_network.dart';
 import 'package:indexed/indexed.dart';
 
 class GasStationMarkerPopup extends StatefulWidget {

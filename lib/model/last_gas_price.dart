@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 class LastGasPrice {
   int gasPriceId;
   int gasPriceDatetimestamp;
