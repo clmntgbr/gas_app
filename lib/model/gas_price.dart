@@ -1,4 +1,4 @@
-class LastGasPrice {
+class GasPrice {
   int gasPriceId;
   int gasPriceDatetimestamp;
   int gasPriceValue;
@@ -8,7 +8,7 @@ class LastGasPrice {
   String gasPriceDifference;
   bool isLowPrice;
 
-  LastGasPrice({
+  GasPrice({
     required this.gasPriceId,
     required this.gasPriceDatetimestamp,
     required this.gasPriceValue,
@@ -19,15 +19,15 @@ class LastGasPrice {
     required this.isLowPrice,
   });
 
-  factory LastGasPrice.fromJson(dynamic json) {
-    return LastGasPrice(
+  factory GasPrice.fromJson(dynamic json) {
+    return GasPrice(
       gasPriceId: json['gasPriceId'],
       gasPriceDatetimestamp: json['gasPriceDatetimestamp'],
       gasPriceValue: json['gasPriceValue'],
       gasTypeId: json['gasTypeId'],
       gasTypeLabel: json['gasTypeLabel'],
       currency: json['currency'],
-      gasPriceDifference: json['gasPriceDifference'],
+      gasPriceDifference: json['gasPriceDifference'] ?? 'N/A',
       isLowPrice: json['isLowPrice'] ?? false,
     );
   }

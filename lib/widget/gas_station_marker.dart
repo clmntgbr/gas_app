@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:gas_app/constants.dart';
 import '../model/gas_station.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -16,8 +17,6 @@ class GasStationMarker extends Marker {
             double.parse(gasStation.address.latitude),
             double.parse(gasStation.address.longitude),
           ),
-          builder: (BuildContext ctx) => Image.asset(
-            hasLowPrices ? 'assets/marker/marker_low.png' : 'assets/marker/marker.png',
-          ),
+          builder: (BuildContext ctx) => Image.network(Constants.baseUrl + gasStation.imagePath),
         );
 }

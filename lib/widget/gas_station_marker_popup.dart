@@ -1,8 +1,9 @@
 import 'dart:io';
 import 'dart:ui';
-
+import 'package:image_network/image_network.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../constants.dart';
 import '../model/gas_station.dart';
 import 'package:getwidget/components/button/gf_button.dart';
 import 'package:indexed/indexed.dart';
@@ -43,11 +44,11 @@ class GasStationMarkerPopupState extends State<GasStationMarkerPopup> {
                           topLeft: Radius.circular(20),
                           topRight: Radius.circular(20),
                         ),
-                        child: Image(
-                          image: const AssetImage('assets/marker/75d481da-5dd4-497e-a426-f6367685c042.jpg'),
+                        child: ImageNetwork(
+                          image: Constants.baseUrl + gasStation.imagePath,
                           height: 225,
                           width: MediaQuery.of(context).size.width,
-                          fit: BoxFit.fitWidth,
+                          fitAndroidIos: BoxFit.fitWidth,
                         ),
                       ),
                     ),

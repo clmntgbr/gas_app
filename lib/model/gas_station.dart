@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'address.dart';
+import 'gas_price.dart';
 import 'gas_service.dart';
 import 'google_place.dart';
-import 'last_gas_price.dart';
 
 GasStation getGasStationFromJson(String str) => GasStation.fromJson(json.decode(str));
 
@@ -63,7 +63,7 @@ class GasStation {
           .toList(),
       lastGasPrices: json['lastPrices']
           .map(
-            (tagJson) => LastGasPrice.fromJson(tagJson),
+            (tagJson) => GasPrice.fromJson(tagJson),
           )
           .toList(),
       hasLowPrices: json['hasLowPrices'],

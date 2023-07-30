@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:gas_app/model/gas_station.dart';
-import 'package:gas_app/model/last_gas_price.dart';
+import 'package:gas_app/model/gas_price.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 List<Widget> getLastGasPrices(GasStation gasStation) {
   List<Widget> widgets = [];
 
-  for (LastGasPrice element in gasStation.lastGasPrices) {
+  for (GasPrice element in gasStation.lastGasPrices) {
     TextStyle textStyle = GoogleFonts.roboto(
       fontWeight: FontWeight.bold,
       fontSize: 14,
@@ -50,10 +50,10 @@ List<Widget> getLastGasPrices(GasStation gasStation) {
 
 TextStyle popUpTextColor(String value) {
   Color color = Colors.orangeAccent;
-  if ('higher' == value) {
+  if ('increasing' == value) {
     color = Colors.redAccent;
   }
-  if ('lower' == value) {
+  if ('decreasing' == value) {
     color = Colors.green;
   }
 
