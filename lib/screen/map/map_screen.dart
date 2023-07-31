@@ -18,10 +18,12 @@ class MapScreen extends StatefulWidget {
 class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   Animation<double>? topBarAnimation;
   final ScrollController scrollController = ScrollController();
-  final PopupController _popupLayerController = PopupController();
-  final mapController = MapController();
+  final PopupController popupLayerController = PopupController();
+  final MapController mapController = MapController();
 
   double currentZoom = 12.0;
+  double minZoom = 5;
+  double maxZoom = 18;
   double topBarOpacity = 0.0;
   LatLng currentCenter = const LatLng(48.764977, 2.358192);
 
@@ -108,9 +110,56 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                 children: [
                   Expanded(
                     child: FlutterMap(
+                      mapController: mapController,
+                      nonRotatedChildren: [
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.only(left: 10, top: 10, right: 10),
+                                child: FloatingActionButton(
+                                  heroTag: 'zoomInButton',
+                                  mini: true,
+                                  backgroundColor: Theme.of(context).primaryColor,
+                                  onPressed: () {
+                                    setState(() {
+                                      if (currentZoom < maxZoom) {
+                                        currentZoom = currentZoom + 1;
+                                      }
+                                    });
+                                    mapController.move(currentCenter, currentZoom);
+                                  },
+                                  child: Icon(Icons.zoom_in, color: IconTheme.of(context).color),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(10),
+                                child: FloatingActionButton(
+                                  heroTag: 'zoomOutButton',
+                                  mini: true,
+                                  backgroundColor: Theme.of(context).primaryColor,
+                                  onPressed: () {
+                                    setState(() {
+                                      if (currentZoom > minZoom) {
+                                        currentZoom = currentZoom - 1;
+                                      }
+                                    });
+                                    mapController.move(currentCenter, currentZoom);
+                                  },
+                                  child: Icon(Icons.zoom_out, color: IconTheme.of(context).color),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                       options: MapOptions(
                         center: currentCenter,
-                        onTap: (_, __) => _popupLayerController.hideAllPopups(),
+                        maxZoom: maxZoom,
+                        minZoom: minZoom,
+                        onTap: (_, __) => popupLayerController.hideAllPopups(),
                         zoom: currentZoom,
                         onMapEvent: (mapEvent) {},
                       ),
@@ -123,7 +172,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                           options: PopupMarkerLayerOptions(
                             markerCenterAnimation: const MarkerCenterAnimation(),
                             markers: markers,
-                            popupController: _popupLayerController,
+                            popupController: popupLayerController,
                             // markerTapBehavior: MarkerTapBehavior.togglePopupAndHideRest(),
                             markerTapBehavior: MarkerTapBehavior.custom(
                               (popupSpec, popupState, popupController) => {

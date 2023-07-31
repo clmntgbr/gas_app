@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:gas_app/model/gas_station_brand.dart';
+
 import 'address.dart';
 import 'gas_price.dart';
 import 'gas_service.dart';
@@ -19,6 +21,7 @@ class GasStation {
 
   Address address;
   GooglePlace googlePlace;
+  GasStationBrand gasStationBrand;
   List<dynamic> gasServices;
   List<dynamic> lastGasPrices;
 
@@ -35,6 +38,7 @@ class GasStation {
     required this.closedAt,
     required this.address,
     required this.googlePlace,
+    required this.gasStationBrand,
     required this.gasServices,
     required this.lastGasPrices,
     required this.hasLowPrices,
@@ -55,6 +59,9 @@ class GasStation {
       ),
       googlePlace: GooglePlace.fromJson(
         json['googlePlace'],
+      ),
+      gasStationBrand: GasStationBrand.fromJson(
+        json['gasStationBrand'],
       ),
       gasServices: json['gasServices']
           .map(

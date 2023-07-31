@@ -17,6 +17,8 @@ class GasStationMarker extends Marker {
             double.parse(gasStation.address.latitude),
             double.parse(gasStation.address.longitude),
           ),
-          builder: (BuildContext ctx) => Image.network(Constants.baseUrl + gasStation.imagePath),
+          builder: (BuildContext ctx) => hasLowPrices
+              ? Image.network(Constants.baseUrl + gasStation.gasStationBrand.imageLowPath)
+              : Image.network(Constants.baseUrl + gasStation.gasStationBrand.imagePath),
         );
 }
