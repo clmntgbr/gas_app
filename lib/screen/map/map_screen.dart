@@ -7,6 +7,8 @@ import '../../widget/gas_station_marker.dart';
 import '../../widget/gas_station_marker_popup.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../widget/scale_layer.dart';
+
 class MapScreen extends StatefulWidget {
   const MapScreen({Key? key, this.animationController}) : super(key: key);
 
@@ -101,6 +103,11 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    const RoundedRectangleBorder cZoomIn = RoundedRectangleBorder(
+        side: BorderSide(width: 0.0), borderRadius: BorderRadius.only(topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0)));
+    const RoundedRectangleBorder cZoomOut = RoundedRectangleBorder(
+        side: BorderSide(width: 0.0), borderRadius: BorderRadius.only(bottomRight: Radius.circular(8.0), bottomLeft: Radius.circular(8.0)));
+
     return PopupScope(
       child: Scaffold(
         body: Stack(
@@ -112,17 +119,28 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                     child: FlutterMap(
                       mapController: mapController,
                       nonRotatedChildren: [
+                        ScaleLayerWidget(
+                          options: ScaleLayerPluginOption(
+                            lineColor: const Color.fromARGB(255, 0, 0, 0),
+                            lineWidth: 2,
+                            textStyle: const TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 12),
+                            padding: const EdgeInsets.only(top: 50, left: 10),
+                          ),
+                        ),
                         Align(
                           alignment: Alignment.centerRight,
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.only(left: 10, top: 10, right: 10),
+                              Container(
+                                height: 30.0,
+                                width: 40.0,
+                                padding: const EdgeInsets.only(right: 10),
                                 child: FloatingActionButton(
+                                  shape: ShapeBorder.lerp(cZoomIn, null, 0.0),
                                   heroTag: 'zoomInButton',
                                   mini: true,
-                                  backgroundColor: Theme.of(context).primaryColor,
+                                  backgroundColor: Colors.white,
                                   onPressed: () {
                                     setState(() {
                                       if (currentZoom < maxZoom) {
@@ -131,15 +149,18 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                                     });
                                     mapController.move(currentCenter, currentZoom);
                                   },
-                                  child: Icon(Icons.zoom_in, color: IconTheme.of(context).color),
+                                  child: Icon(Icons.add, color: IconTheme.of(context).color),
                                 ),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.all(10),
+                              Container(
+                                height: 30.0,
+                                width: 40.0,
+                                padding: const EdgeInsets.only(right: 10),
                                 child: FloatingActionButton(
+                                  shape: ShapeBorder.lerp(cZoomOut, null, 0.0),
                                   heroTag: 'zoomOutButton',
                                   mini: true,
-                                  backgroundColor: Theme.of(context).primaryColor,
+                                  backgroundColor: Colors.white,
                                   onPressed: () {
                                     setState(() {
                                       if (currentZoom > minZoom) {
@@ -148,7 +169,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                                     });
                                     mapController.move(currentCenter, currentZoom);
                                   },
-                                  child: Icon(Icons.zoom_out, color: IconTheme.of(context).color),
+                                  child: Icon(Icons.remove, color: IconTheme.of(context).color),
                                 ),
                               ),
                             ],
@@ -157,11 +178,23 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                       ],
                       options: MapOptions(
                         center: currentCenter,
+                        onSecondaryTap: (tapPosition, point) => {print('here')},
                         maxZoom: maxZoom,
                         minZoom: minZoom,
                         onTap: (_, __) => popupLayerController.hideAllPopups(),
                         zoom: currentZoom,
-                        onMapEvent: (mapEvent) {},
+                        onMapEvent: (mapEvent) {
+                          if (mapEvent is MapEventDoubleTapZoomEnd) {
+                            setState(() {
+                              if (currentZoom < maxZoom) {
+                                currentZoom = mapEvent.zoom;
+                              }
+                              currentCenter = mapEvent.center;
+                            });
+                            mapController.move(currentCenter, currentZoom);
+                          }
+                          debugPrint(mapEvent.toString());
+                        },
                       ),
                       children: [
                         TileLayer(
