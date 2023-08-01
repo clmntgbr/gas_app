@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
+import 'package:gas_app/model/gas_type.dart';
+import 'package:gas_app/service/gas_type_service.dart';
+import '../../constants.dart';
 import '../../model/gas_station.dart';
+import '../../model/get_gas_types.dart';
 import '../../service/gas_station_service.dart';
 import '../../widget/gas_station_marker.dart';
 import '../../widget/gas_station_marker_popup.dart';
@@ -27,15 +31,20 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   double minZoom = 5;
   double maxZoom = 18;
   double topBarOpacity = 0.0;
+  int nbGasTypes = -1;
   LatLng currentCenter = const LatLng(48.764977, 2.358192);
 
   late List<Marker> markers = [];
   final gasStationService = GasStationService();
+  final gasTypeService = GasTypeService();
+
+  late Future<GetGasTypes> gasTypes;
 
   @override
   void initState() {
     super.initState();
 
+    gasTypes = gasTypeService.getGasTypes();
     getGasStationsMap(currentCenter.latitude, currentCenter.longitude, 50000);
 
     topBarAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -108,6 +117,16 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     const RoundedRectangleBorder cZoomOut = RoundedRectangleBorder(
         side: BorderSide(width: 0.0), borderRadius: BorderRadius.only(bottomRight: Radius.circular(8.0), bottomLeft: Radius.circular(8.0)));
 
+    gasTypes.then(
+      (value) {
+        setState(
+          () {
+            nbGasTypes = value.totalItems;
+          },
+        );
+      },
+    );
+
     return PopupScope(
       child: Scaffold(
         body: Stack(
@@ -119,6 +138,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                     child: FlutterMap(
                       mapController: mapController,
                       nonRotatedChildren: [
+                        getGasTypesWidget(),
                         ScaleLayerWidget(
                           options: ScaleLayerPluginOption(
                             lineColor: const Color.fromARGB(255, 0, 0, 0),
@@ -229,31 +249,6 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                                 )
                               },
                             ),
-                            // onPopupEvent: (event, selectedMarkers) {
-                            //   debugPrint(selectedMarkers.toString());
-                            //   if (selectedMarkers.isEmpty) {
-                            //     debugPrint('closing');
-                            //     return;
-                            //   }
-                            //   var marker = selectedMarkers.first;
-                            //   if (marker is GasStationMarker) {
-                            //     debugPrint('open');
-                            //     showModalBottomSheet(
-                            //       elevation: 0,
-                            //       clipBehavior: Clip.antiAlias,
-                            //       useSafeArea: true,
-                            //       barrierColor: Colors.black.withAlpha(1),
-                            //       backgroundColor: Colors.transparent,
-                            //       context: context,
-                            //       builder: (BuildContext context) {
-                            //         return GasStationMarkerPopup(
-                            //           gasStation: marker.gasStation,
-                            //         );
-                            //       },
-                            //     );
-                            //     selectedMarkers = [];
-                            //   }
-                            // },
                           ),
                         ),
                       ],
@@ -265,6 +260,64 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
           ],
         ),
       ),
+    );
+  }
+
+  Widget getGasTypesWidget() {
+    int totalGasTypes = -1;
+
+    return FutureBuilder<GetGasTypes>(
+      future: gasTypes,
+      builder: (BuildContext context, AsyncSnapshot<GetGasTypes> snapshot) {
+        if (!snapshot.hasData) {
+          return Container();
+        }
+
+        List<Widget> data = [];
+
+        if (totalGasTypes == -1) {
+          totalGasTypes = snapshot.data?.totalItems ?? 0;
+        }
+
+        if (snapshot.data!.statusCode != 200) {
+          return Container();
+        }
+
+        if (totalGasTypes == 0) {
+          return Container();
+        }
+
+        if (nbGasTypes == -1) {
+          return Container();
+        }
+
+        data.addAll(
+          List<Widget>.generate(
+            totalGasTypes,
+            (int index) {
+              GasType gasType = snapshot.data?.gasTypes[index];
+
+              return Container(
+                width: 40,
+                height: 40,
+                margin: const EdgeInsets.only(top: 8, bottom: 8, right: 10),
+                child: GestureDetector(
+                  onTap: () {},
+                  child: Image.network(Constants.baseUrl + gasType.imagePath),
+                ),
+              );
+            },
+          ),
+        );
+
+        return Align(
+          alignment: Alignment.topRight,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: data,
+          ),
+        );
+      },
     );
   }
 }

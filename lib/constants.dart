@@ -5,6 +5,7 @@ class Constants {
   static String baseApiUrl = 'https://gas.traefik.me/api';
 
   static String gasStationsMapEndpoint = '/gas_stations/map';
+  static String gasTypesEndpoint = '/gas_types';
   static String authenticateEndpoint = '/authenticate';
   static String usersEndpoint = '/users';
 
