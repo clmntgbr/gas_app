@@ -10,8 +10,8 @@ const storage = FlutterSecureStorage();
 class GasStationService {
   final apiService = ApiService();
 
-  Future<GetGasStationsMap> getGasStationsMap(double latitude, double longitude, double radius) async {
-    String url = '${Constants.baseApiUrl}${Constants.gasStationsMapEndpoint}?latitude=$latitude&longitude=$longitude&radius=$radius';
+  Future<GetGasStationsMap> getGasStationsMap(double latitude, double longitude, double radius, String gasType) async {
+    String url = '${Constants.baseApiUrl}${Constants.gasStationsMapEndpoint}?latitude=$latitude&longitude=$longitude&radius=$radius&gasTypeId=$gasType';
 
     debugPrint('GET $url');
 

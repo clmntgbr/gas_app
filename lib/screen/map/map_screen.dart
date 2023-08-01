@@ -40,17 +40,20 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   final apiService = ApiService();
 
   late GetGasTypes gasTypes = GetGasTypes(gasTypes: [], totalItems: 0, statusCode: -1);
-  late String favoriteGasTypeUuid = '';
+  late String favoriteGasTypeId = '';
   String? selected;
 
   @override
   void initState() {
     super.initState();
 
-    apiService.getFavoriteGasType().then((value) => selected = value);
-    gasTypeService.getGasTypes().then((value) => gasTypes = value);
-
-    getGasStationsMap(currentCenter.latitude, currentCenter.longitude, 50000);
+    apiService.getFavoriteGasType().then((value) {
+      selected = value;
+      getGasStationsMap(currentCenter.latitude, currentCenter.longitude, 50000, value);
+    });
+    gasTypeService.getGasTypes().then((value) {
+      gasTypes = value;
+    });
 
     topBarAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
@@ -94,14 +97,14 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     );
   }
 
-  getGasStationsMap(double latitude, double longitude, double radius) {
-    gasStationService.getGasStationsMap(currentCenter.latitude, currentCenter.longitude, 50000).then(
+  getGasStationsMap(double latitude, double longitude, double radius, String gasType) {
+    gasStationService.getGasStationsMap(currentCenter.latitude, currentCenter.longitude, 50000, gasType).then(
       (value) {
         markers = [];
         for (GasStation element in value.gasStations) {
-          // markers.add(
-          //   addMarker(element, element.hasLowPrices),
-          // );
+          markers.add(
+            addMarker(element, element.hasLowPrices),
+          );
         }
         setState(() {});
       },
@@ -141,53 +144,56 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                             padding: const EdgeInsets.only(top: 50, left: 10),
                           ),
                         ),
+                        getGasTypesWidget(),
                         Align(
-                          alignment: Alignment.centerRight,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              getGasTypesWidget(),
-                              Container(
-                                height: 30.0,
-                                width: 40.0,
-                                padding: const EdgeInsets.only(right: 10),
-                                child: FloatingActionButton(
-                                  shape: ShapeBorder.lerp(cZoomIn, null, 0.0),
-                                  heroTag: 'zoomInButton',
-                                  mini: true,
-                                  backgroundColor: Colors.white,
-                                  onPressed: () {
-                                    setState(() {
-                                      if (currentZoom < maxZoom) {
-                                        currentZoom = currentZoom + 1;
-                                      }
-                                    });
-                                    mapController.move(currentCenter, currentZoom);
-                                  },
-                                  child: Icon(Icons.add, color: IconTheme.of(context).color),
+                          alignment: Alignment.bottomRight,
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 120, right: 6),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Container(
+                                  height: 30.0,
+                                  width: 40.0,
+                                  padding: const EdgeInsets.only(right: 10),
+                                  child: FloatingActionButton(
+                                    shape: ShapeBorder.lerp(cZoomIn, null, 0.0),
+                                    heroTag: 'zoomInButton',
+                                    mini: true,
+                                    backgroundColor: Colors.white,
+                                    onPressed: () {
+                                      setState(() {
+                                        if (currentZoom < maxZoom) {
+                                          currentZoom = currentZoom + 1;
+                                        }
+                                      });
+                                      mapController.move(currentCenter, currentZoom);
+                                    },
+                                    child: Icon(Icons.add, color: IconTheme.of(context).color),
+                                  ),
                                 ),
-                              ),
-                              Container(
-                                height: 30.0,
-                                width: 40.0,
-                                padding: const EdgeInsets.only(right: 10),
-                                child: FloatingActionButton(
-                                  shape: ShapeBorder.lerp(cZoomOut, null, 0.0),
-                                  heroTag: 'zoomOutButton',
-                                  mini: true,
-                                  backgroundColor: Colors.white,
-                                  onPressed: () {
-                                    setState(() {
-                                      if (currentZoom > minZoom) {
-                                        currentZoom = currentZoom - 1;
-                                      }
-                                    });
-                                    mapController.move(currentCenter, currentZoom);
-                                  },
-                                  child: Icon(Icons.remove, color: IconTheme.of(context).color),
+                                Container(
+                                  height: 30.0,
+                                  width: 40.0,
+                                  padding: const EdgeInsets.only(right: 10),
+                                  child: FloatingActionButton(
+                                    shape: ShapeBorder.lerp(cZoomOut, null, 0.0),
+                                    heroTag: 'zoomOutButton',
+                                    mini: true,
+                                    backgroundColor: Colors.white,
+                                    onPressed: () {
+                                      setState(() {
+                                        if (currentZoom > minZoom) {
+                                          currentZoom = currentZoom - 1;
+                                        }
+                                      });
+                                      mapController.move(currentCenter, currentZoom);
+                                    },
+                                    child: Icon(Icons.remove, color: IconTheme.of(context).color),
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -259,41 +265,32 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   }
 
   Widget getGasTypesWidget() {
-    return Container(
-      color: Colors.green,
-      width: 88,
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton(
-          elevation: 0,
-          value: selected,
-          dropdownColor: Colors.transparent,
-          iconSize: 0.0,
-          icon: null,
-          onChanged: (value) {
-            setState(() {
-              apiService.setFavoriteGasType(value!);
-              selected = value;
-            });
-          },
-          items: List.generate(
-            gasTypes.totalItems,
-            (int index) {
-              GasType gasType = gasTypes.gasTypes[index];
-              return DropdownMenuItem(
-                value: gasType.uuid,
-                child: Container(
-                  color: Colors.red,
-                  width: 50,
-                  // padding: const EdgeInsets.only(bottom: 5.0),
-                  child: Image.network(
-                    Constants.baseUrl + gasType.imagePath,
-                    width: 50,
-                    height: 50,
-                  ),
-                ),
-              );
+    List<Widget> items = List.generate(
+      gasTypes.totalItems,
+      (int index) {
+        GasType gasType = gasTypes.gasTypes[index];
+        return Padding(
+          padding: const EdgeInsets.only(top: 5),
+          child: GestureDetector(
+            onTap: () {
+              apiService.setFavoriteGasType(gasType.id);
+              debugPrint(gasType.name);
             },
+            child: Image.network(
+              Constants.baseUrl + gasType.imagePath,
+              width: 45,
+              height: 45,
+            ),
           ),
+        );
+      },
+    ).toList();
+    return Align(
+      alignment: Alignment.topRight,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 50, right: 8),
+        child: Column(
+          children: items,
         ),
       ),
     );
