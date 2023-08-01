@@ -6,11 +6,11 @@ import 'package:gas_app/service/gas_type_service.dart';
 import '../../constants.dart';
 import '../../model/gas_station.dart';
 import '../../model/get_gas_types.dart';
+import '../../service/api_service.dart';
 import '../../service/gas_station_service.dart';
 import '../../widget/gas_station_marker.dart';
 import '../../widget/gas_station_marker_popup.dart';
 import 'package:latlong2/latlong.dart';
-
 import '../../widget/scale_layer.dart';
 
 class MapScreen extends StatefulWidget {
@@ -37,14 +37,19 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   late List<Marker> markers = [];
   final gasStationService = GasStationService();
   final gasTypeService = GasTypeService();
+  final apiService = ApiService();
 
-  late Future<GetGasTypes> gasTypes;
+  late GetGasTypes gasTypes = GetGasTypes(gasTypes: [], totalItems: 0, statusCode: -1);
+  late String favoriteGasTypeUuid = '';
+  String? selected;
 
   @override
   void initState() {
     super.initState();
 
-    gasTypes = gasTypeService.getGasTypes();
+    apiService.getFavoriteGasType().then((value) => selected = value);
+    gasTypeService.getGasTypes().then((value) => gasTypes = value);
+
     getGasStationsMap(currentCenter.latitude, currentCenter.longitude, 50000);
 
     topBarAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -94,9 +99,9 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
       (value) {
         markers = [];
         for (GasStation element in value.gasStations) {
-          markers.add(
-            addMarker(element, element.hasLowPrices),
-          );
+          // markers.add(
+          //   addMarker(element, element.hasLowPrices),
+          // );
         }
         setState(() {});
       },
@@ -117,16 +122,6 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     const RoundedRectangleBorder cZoomOut = RoundedRectangleBorder(
         side: BorderSide(width: 0.0), borderRadius: BorderRadius.only(bottomRight: Radius.circular(8.0), bottomLeft: Radius.circular(8.0)));
 
-    gasTypes.then(
-      (value) {
-        setState(
-          () {
-            nbGasTypes = value.totalItems;
-          },
-        );
-      },
-    );
-
     return PopupScope(
       child: Scaffold(
         body: Stack(
@@ -138,7 +133,6 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                     child: FlutterMap(
                       mapController: mapController,
                       nonRotatedChildren: [
-                        getGasTypesWidget(),
                         ScaleLayerWidget(
                           options: ScaleLayerPluginOption(
                             lineColor: const Color.fromARGB(255, 0, 0, 0),
@@ -152,6 +146,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
+                              getGasTypesWidget(),
                               Container(
                                 height: 30.0,
                                 width: 40.0,
@@ -264,60 +259,43 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   }
 
   Widget getGasTypesWidget() {
-    int totalGasTypes = -1;
-
-    return FutureBuilder<GetGasTypes>(
-      future: gasTypes,
-      builder: (BuildContext context, AsyncSnapshot<GetGasTypes> snapshot) {
-        if (!snapshot.hasData) {
-          return Container();
-        }
-
-        List<Widget> data = [];
-
-        if (totalGasTypes == -1) {
-          totalGasTypes = snapshot.data?.totalItems ?? 0;
-        }
-
-        if (snapshot.data!.statusCode != 200) {
-          return Container();
-        }
-
-        if (totalGasTypes == 0) {
-          return Container();
-        }
-
-        if (nbGasTypes == -1) {
-          return Container();
-        }
-
-        data.addAll(
-          List<Widget>.generate(
-            totalGasTypes,
+    return Container(
+      color: Colors.green,
+      width: 88,
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton(
+          elevation: 0,
+          value: selected,
+          dropdownColor: Colors.transparent,
+          iconSize: 0.0,
+          icon: null,
+          onChanged: (value) {
+            setState(() {
+              apiService.setFavoriteGasType(value!);
+              selected = value;
+            });
+          },
+          items: List.generate(
+            gasTypes.totalItems,
             (int index) {
-              GasType gasType = snapshot.data?.gasTypes[index];
-
-              return Container(
-                width: 40,
-                height: 40,
-                margin: const EdgeInsets.only(top: 8, bottom: 8, right: 10),
-                child: GestureDetector(
-                  onTap: () {},
-                  child: Image.network(Constants.baseUrl + gasType.imagePath),
+              GasType gasType = gasTypes.gasTypes[index];
+              return DropdownMenuItem(
+                value: gasType.uuid,
+                child: Container(
+                  color: Colors.red,
+                  width: 50,
+                  // padding: const EdgeInsets.only(bottom: 5.0),
+                  child: Image.network(
+                    Constants.baseUrl + gasType.imagePath,
+                    width: 50,
+                    height: 50,
+                  ),
                 ),
               );
             },
           ),
-        );
-
-        return Align(
-          alignment: Alignment.topRight,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: data,
-          ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
