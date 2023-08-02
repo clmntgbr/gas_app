@@ -48,9 +48,10 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     super.initState();
 
     apiService.getFavoriteGasType().then((value) {
-      selected = value;
-      getGasStationsMap(currentCenter.latitude, currentCenter.longitude, 50000, value);
+      selected = (value == 'null' || value == null ? '1' : value);
+      getGasStationsMap(currentCenter.latitude, currentCenter.longitude, 50000, selected);
     });
+
     gasTypeService.getGasTypes().then((value) {
       gasTypes = value;
     });
@@ -97,7 +98,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     );
   }
 
-  getGasStationsMap(double latitude, double longitude, double radius, String gasType) {
+  getGasStationsMap(double latitude, double longitude, double radius, String? gasType) {
     gasStationService.getGasStationsMap(currentCenter.latitude, currentCenter.longitude, 50000, gasType).then(
       (value) {
         markers = [];
@@ -285,6 +286,8 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
         );
       },
     ).toList();
+
+    
     return Align(
       alignment: Alignment.topRight,
       child: Padding(

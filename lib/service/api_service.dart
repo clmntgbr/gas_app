@@ -10,8 +10,8 @@ class ApiService {
     return !Jwt.isExpired(token);
   }
 
-  Future<String> getFavoriteGasType() async {
-    return await storage.read(key: 'favoriteGasTypeId') ?? '1';
+  Future<String?> getFavoriteGasType() async {
+    return await storage.read(key: 'favoriteGasTypeId');
   }
 
   Future setFavoriteGasType(String value) async {
