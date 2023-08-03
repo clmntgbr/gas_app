@@ -324,7 +324,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
               space: 0,
               mainAxisAlignment: MainAxisAlignment.center,
               boxDecoration: BoxDecoration(
-                color: Colors.white,
+                color: Colors.transparent,
                 gradient: null,
                 border: null,
                 backgroundBlendMode: null,
@@ -333,7 +333,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                 shape: BoxShape.circle,
               ),
               openBoxDecoration: BoxDecoration(
-                color: Colors.white,
+                color: Colors.transparent,
                 gradient: null,
                 border: null,
                 backgroundBlendMode: null,
@@ -352,7 +352,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
             dropdownOptions: const DropdownOptions(
               height: 300,
               width: 50,
-              color: Colors.white,
+              color: Colors.transparent,
             ),
             dropdownItemOptions: const DropdownItemOptions(
               padding: EdgeInsets.zero,
