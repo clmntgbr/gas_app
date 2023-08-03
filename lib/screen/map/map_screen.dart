@@ -1,6 +1,9 @@
+import 'package:cool_dropdown/cool_dropdown.dart';
+import 'package:cool_dropdown/models/cool_dropdown_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:gas_app/model/gas_type.dart';
 import 'package:gas_app/service/gas_type_service.dart';
 import '../../constants.dart';
@@ -48,7 +51,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     super.initState();
 
     apiService.getFavoriteGasType().then((value) {
-      selected = (value == 'null' || value == null ? '1' : value);
+      selected = (value == 'null' || value == null ? Constants.gasTypeDefault : value);
       getGasStationsMap(currentCenter.latitude, currentCenter.longitude, 50000, selected);
     });
 
@@ -266,34 +269,107 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   }
 
   Widget getGasTypesWidget() {
-    List<Widget> items = List.generate(
+    List<CoolDropdownItem> items = [];
+    final gasTypeDropdownController = DropdownController();
+    CoolDropdownItem? selectedItem;
+
+    items = List.generate(
       gasTypes.totalItems,
       (int index) {
         GasType gasType = gasTypes.gasTypes[index];
-        return Padding(
-          padding: const EdgeInsets.only(top: 5),
-          child: GestureDetector(
-            onTap: () {
-              apiService.setFavoriteGasType(gasType.id);
-              debugPrint(gasType.name);
-            },
+        CoolDropdownItem coolDropdownItem = CoolDropdownItem(
+          label: '',
+          icon: SizedBox(
+            height: 45,
+            width: 45,
             child: Image.network(
               Constants.baseUrl + gasType.imagePath,
-              width: 45,
-              height: 45,
             ),
           ),
+          value: gasType.uuid,
         );
-      },
-    ).toList();
 
-    
+        if (selected == null && gasType.uuid == Constants.gasTypeDefault) {
+          selectedItem = coolDropdownItem;
+        }
+
+        if (selected == gasType.uuid) {
+          selectedItem = coolDropdownItem;
+        }
+
+        return coolDropdownItem;
+      },
+    );
+
+    if (items.isEmpty) {
+      return Container();
+    }
+
     return Align(
       alignment: Alignment.topRight,
       child: Padding(
         padding: const EdgeInsets.only(top: 50, right: 8),
-        child: Column(
-          children: items,
+        child: DropdownButtonHideUnderline(
+          child: CoolDropdown(
+            controller: gasTypeDropdownController,
+            dropdownList: items,
+            defaultItem: selectedItem ?? items.last,
+            onChange: (uuid) {
+              setState(() {
+                selected = uuid;
+                apiService.setFavoriteGasType(uuid);
+              });
+              gasTypeDropdownController.close();
+            },
+            resultOptions: const ResultOptions(
+              space: 0,
+              mainAxisAlignment: MainAxisAlignment.center,
+              boxDecoration: BoxDecoration(
+                color: Colors.white,
+                gradient: null,
+                border: null,
+                backgroundBlendMode: null,
+                borderRadius: null,
+                boxShadow: null,
+                shape: BoxShape.circle,
+              ),
+              openBoxDecoration: BoxDecoration(
+                color: Colors.white,
+                gradient: null,
+                border: null,
+                backgroundBlendMode: null,
+                borderRadius: null,
+                boxShadow: null,
+                shape: BoxShape.circle,
+              ),
+              padding: EdgeInsets.only(left: 0, right: 0),
+              width: 50,
+              render: ResultRender.icon,
+              icon: SizedBox(
+                width: 0,
+                height: 0,
+              ),
+            ),
+            dropdownOptions: const DropdownOptions(
+              height: 300,
+              width: 50,
+              color: Colors.white,
+            ),
+            dropdownItemOptions: const DropdownItemOptions(
+              padding: EdgeInsets.zero,
+              render: DropdownItemRender.icon,
+              selectedPadding: EdgeInsets.zero,
+              mainAxisAlignment: MainAxisAlignment.center,
+              selectedBoxDecoration: BoxDecoration(
+                color: Colors.transparent,
+                gradient: null,
+                border: null,
+                backgroundBlendMode: null,
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+                boxShadow: null,
+              ),
+            ),
+          ),
         ),
       ),
     );

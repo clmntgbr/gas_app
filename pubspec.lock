@@ -33,14 +33,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.11.0"
-  barcode_scan2:
-    dependency: "direct main"
-    description:
-      name: barcode_scan2
-      sha256: "0b0625d27841a21e36e896195d86b2aada335e3c486f63647cce701495718e16"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.2.4"
   basic_utils:
     dependency: "direct main"
     description:
@@ -89,6 +81,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.1"
+  cool_dropdown:
+    dependency: "direct main"
+    description:
+      name: cool_dropdown
+      sha256: "24400f57740b4779407586121e014bef241699ad2a52c506a7e1e7616cb68653"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   crypto:
     dependency: transitive
     description:
@@ -137,14 +137,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.2"
-  fixnum:
-    dependency: transitive
-    description:
-      name: fixnum
-      sha256: "25517a4deb0c03aa0f32fd12db525856438902d9c16536311e76cdc57b31d7d1"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.0"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -238,14 +230,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
-  flutter_slidable:
-    dependency: "direct main"
-    description:
-      name: flutter_slidable
-      sha256: cc4231579e3eae41ae166660df717f4bad1359c87f4a4322ad8ba1befeb3d2be
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.0"
   flutter_svg:
     dependency: "direct main"
     description:
@@ -592,14 +576,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
-  protobuf:
-    dependency: transitive
-    description:
-      name: protobuf
-      sha256: "01dd9bd0fa02548bf2ceee13545d4a0ec6046459d847b6b061d8a27237108a08"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.0"
   provider:
     dependency: transitive
     description:
@@ -608,22 +584,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.5"
-  quickalert:
-    dependency: "direct main"
-    description:
-      name: quickalert
-      sha256: "33a52870b2a87c55d0649d0cd228efaa2368d5df39231fdecebb71f349a9b221"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.1"
-  shimmer:
-    dependency: "direct main"
-    description:
-      name: shimmer
-      sha256: "5f88c883a22e9f9f299e5ba0e4f7e6054857224976a5d9f839d4ebdc94a14ac9"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.0"
   sky_engine:
     dependency: transitive
     description: flutter

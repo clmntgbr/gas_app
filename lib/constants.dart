@@ -9,6 +9,8 @@ class Constants {
   static String authenticateEndpoint = '/authenticate';
   static String usersEndpoint = '/users';
 
+  static String gasTypeDefault = '719190d5-dd67-4f06-b308-39d3326ab749';
+
   static Color kPrimaryColor = const Color(0xFF27AE60);
   static BoxShadow kBoxShadow = BoxShadow(
     color: Colors.grey.withOpacity(0.2),

@@ -11,10 +11,10 @@ class ApiService {
   }
 
   Future<String?> getFavoriteGasType() async {
-    return await storage.read(key: 'favoriteGasTypeId');
+    return await storage.read(key: 'favoriteGasTypeUuid');
   }
 
   Future setFavoriteGasType(String value) async {
-    await storage.write(key: 'favoriteGasTypeId', value: value);
+    await storage.write(key: 'favoriteGasTypeUuid', value: value);
   }
 }
