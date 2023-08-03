@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:gas_app/model/gas_station_brand.dart';
+import 'gas_station_brand.dart';
 
 import 'address.dart';
 import 'gas_price.dart';

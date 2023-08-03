@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'gas_type.dart';
 
 GetGasTypes gasTypesFromJson(String str, int statusCode) => GetGasTypes.fromJson(json.decode(str), statusCode);

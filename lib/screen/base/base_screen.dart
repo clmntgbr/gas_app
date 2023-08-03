@@ -1,10 +1,9 @@
-import 'package:gas_app/screen/favorites/favorites_screen.dart';
+import 'package:flutter/material.dart';
 
+import '../favorites/favorites_screen.dart';
 import '../map/map_screen.dart';
-
 import 'bottom_bar_view.dart';
 import 'menu_data.dart';
-import 'package:flutter/material.dart';
 
 class BaseScreen extends StatefulWidget {
   const BaseScreen({super.key});

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gas_app/model/gas_station.dart';
-import 'package:gas_app/model/gas_price.dart';
+import '../model/gas_station.dart';
+import '../model/gas_price.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 List<Widget> getLastGasPrices(GasStation gasStation) {
