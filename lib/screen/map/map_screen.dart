@@ -315,8 +315,10 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
             defaultItem: selectedItem ?? items.last,
             onChange: (uuid) {
               setState(() {
+                markers = [];
                 selected = uuid;
                 apiService.setFavoriteGasType(uuid);
+                getGasStationsMap(currentCenter.latitude, currentCenter.longitude, 5000, uuid);
               });
               gasTypeDropdownController.close();
             },
