@@ -1,4 +1,3 @@
-import '../model/get_gas_stations_map.dart';
 import '../constants.dart';
 import '../model/get_gas_types.dart';
 import 'api_service.dart';
