@@ -36,6 +36,7 @@ dependencies:
   indexed: ^0.0.8
   url_launcher: ^6.1.12
   cool_dropdown: ^2.1.0
+  async: ^2.11.0
 
 dev_dependencies:
   flutter_test:

@@ -14,6 +14,7 @@ import '../../widget/gas_station_marker.dart';
 import '../../widget/gas_station_marker_popup.dart';
 import 'package:latlong2/latlong.dart';
 import '../../widget/scale_layer.dart';
+import 'dart:async';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({Key? key, this.animationController}) : super(key: key);
@@ -48,6 +49,8 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   late GetGasTypes gasTypes = GetGasTypes(gasTypes: [], totalItems: 0, statusCode: -1);
   late String favoriteGasTypeId = '';
   String? selected;
+
+  StreamSubscription<dynamic>? streamSubscription;
 
   @override
   void initState() {
@@ -109,17 +112,16 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   }
 
   getGasStationsMap(double latitude, double longitude, double radius, String? gasType) {
-    gasStationService.getGasStationsMap(currentCenter.latitude, currentCenter.longitude, radius, gasType).then(
-      (value) {
-        markers = [];
-        for (GasStation element in value.gasStations) {
-          markers.add(
-            addMarker(element, element.hasLowPrices),
-          );
-        }
-        setState(() {});
-      },
-    );
+    streamSubscription =
+        gasStationService.getGasStationsMap(currentCenter.latitude, currentCenter.longitude, radius, gasType).asStream().listen((data) {
+      markers = [];
+      for (GasStation element in data.gasStations) {
+        markers.add(
+          addMarker(element, element.hasLowPrices),
+        );
+      }
+      setState(() {});
+    });
   }
 
   Marker addMarker(GasStation gasStation, bool hasLowPrices) {
@@ -131,11 +133,6 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    const RoundedRectangleBorder cZoomIn = RoundedRectangleBorder(
-        side: BorderSide(width: 0.0), borderRadius: BorderRadius.only(topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0)));
-    const RoundedRectangleBorder cZoomOut = RoundedRectangleBorder(
-        side: BorderSide(width: 0.0), borderRadius: BorderRadius.only(bottomRight: Radius.circular(8.0), bottomLeft: Radius.circular(8.0)));
-
     return PopupScope(
       child: Scaffold(
         body: Stack(
@@ -156,91 +153,6 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                           ),
                         ),
                         getGasTypesWidget(),
-                        Align(
-                          alignment: Alignment.bottomRight,
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 120, right: 6),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                Container(
-                                  height: 30.0,
-                                  width: 40.0,
-                                  padding: const EdgeInsets.only(right: 10),
-                                  child: FloatingActionButton(
-                                    shape: ShapeBorder.lerp(cZoomIn, null, 0.0),
-                                    heroTag: 'zoomInButton',
-                                    mini: true,
-                                    backgroundColor: Colors.white,
-                                    onPressed: () {
-                                      setState(() {
-                                        if (currentZoom < maxZoom) {
-                                          currentZoom = currentZoom + 1;
-                                        }
-                                      });
-                                      mapController.move(currentCenter, currentZoom);
-
-                                      var northEastLatitude = mapController.bounds!.northEast.latitude;
-                                      var northWestLatitude = mapController.bounds!.northWest.latitude;
-                                      var northEastLongitude = mapController.bounds!.northEast.longitude;
-                                      var northWestLongitude = mapController.bounds!.northWest.longitude;
-
-                                      distance = apiService.distanceBetweenTwoCoordinates(
-                                        northEastLatitude,
-                                        northEastLongitude,
-                                        northWestLatitude,
-                                        northWestLongitude,
-                                      );
-
-                                      if (isGasTypeLoaded && isDistanceLoaded) {
-                                        // markers = [];
-                                        getGasStationsMap(currentCenter.latitude, currentCenter.longitude, distance, selected);
-                                      }
-                                    },
-                                    child: Icon(Icons.add, color: IconTheme.of(context).color),
-                                  ),
-                                ),
-                                Container(
-                                  height: 30.0,
-                                  width: 40.0,
-                                  padding: const EdgeInsets.only(right: 10),
-                                  child: FloatingActionButton(
-                                    shape: ShapeBorder.lerp(cZoomOut, null, 0.0),
-                                    heroTag: 'zoomOutButton',
-                                    mini: true,
-                                    backgroundColor: Colors.white,
-                                    onPressed: () {
-                                      setState(() {
-                                        if (currentZoom > minZoom) {
-                                          currentZoom = currentZoom - 1;
-                                        }
-                                      });
-                                      mapController.move(currentCenter, currentZoom);
-
-                                      var northEastLatitude = mapController.bounds!.northEast.latitude;
-                                      var northWestLatitude = mapController.bounds!.northWest.latitude;
-                                      var northEastLongitude = mapController.bounds!.northEast.longitude;
-                                      var northWestLongitude = mapController.bounds!.northWest.longitude;
-
-                                      distance = apiService.distanceBetweenTwoCoordinates(
-                                        northEastLatitude,
-                                        northEastLongitude,
-                                        northWestLatitude,
-                                        northWestLongitude,
-                                      );
-
-                                      if (isGasTypeLoaded && isDistanceLoaded) {
-                                        // markers = [];
-                                        getGasStationsMap(currentCenter.latitude, currentCenter.longitude, distance, selected);
-                                      }
-                                    },
-                                    child: Icon(Icons.remove, color: IconTheme.of(context).color),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
                       ],
                       options: MapOptions(
                         center: currentCenter,
@@ -312,6 +224,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                               );
 
                               if (isGasTypeLoaded && isDistanceLoaded) {
+                                streamSubscription?.cancel();
                                 getGasStationsMap(currentCenter.latitude, currentCenter.longitude, distance, selected);
                               }
                             });
@@ -322,6 +235,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                               currentCenter = mapEvent.center;
                               mapController.move(currentCenter, currentZoom);
                               if (isGasTypeLoaded && isDistanceLoaded) {
+                                streamSubscription?.cancel();
                                 getGasStationsMap(currentCenter.latitude, currentCenter.longitude, distance, selected);
                               }
                             });
@@ -427,6 +341,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                 apiService.setFavoriteGasType(uuid);
                 if (isGasTypeLoaded && isDistanceLoaded) {
                   markers = [];
+                  streamSubscription?.cancel();
                   getGasStationsMap(currentCenter.latitude, currentCenter.longitude, distance, uuid);
                 }
               });
