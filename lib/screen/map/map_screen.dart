@@ -387,8 +387,8 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
         CoolDropdownItem coolDropdownItem = CoolDropdownItem(
           label: '',
           icon: SizedBox(
-            height: 45,
-            width: 45,
+            height: 70,
+            width: 70,
             child: Image.network(
               Constants.baseUrl + gasType.imagePath,
             ),
@@ -433,6 +433,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
               gasTypeDropdownController.close();
             },
             resultOptions: const ResultOptions(
+              width: 70,
               space: 0,
               mainAxisAlignment: MainAxisAlignment.center,
               boxDecoration: BoxDecoration(
@@ -454,7 +455,6 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                 shape: BoxShape.circle,
               ),
               padding: EdgeInsets.only(left: 0, right: 0),
-              width: 50,
               render: ResultRender.icon,
               icon: SizedBox(
                 width: 0,
@@ -463,7 +463,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
             ),
             dropdownOptions: const DropdownOptions(
               height: 300,
-              width: 50,
+              width: 70,
               color: Colors.transparent,
             ),
             dropdownItemOptions: const DropdownItemOptions(

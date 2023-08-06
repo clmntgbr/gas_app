@@ -9,7 +9,7 @@ List<Widget> getLastGasPrices(GasStation gasStation) {
   for (GasPrice element in gasStation.lastGasPrices) {
     TextStyle textStyle = GoogleFonts.roboto(
       fontWeight: FontWeight.bold,
-      fontSize: 14,
+      fontSize: 12,
       color: Colors.black,
     );
     if (element.isLowPrice) {
