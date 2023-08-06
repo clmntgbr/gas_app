@@ -182,7 +182,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                         },
                         onMapEvent: (mapEvent) {
                           debugPrint(mapEvent.toString());
-                          if (mapEvent is MapEventMove || mapEvent is MapEventRotate) {
+                          if (mapEvent is MapEventMove || mapEvent is MapEventRotate || mapEvent is MapEventFlingAnimation) {
                             setState(() {
                               currentZoom = mapEvent.zoom;
 
@@ -195,7 +195,6 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                               }
 
                               currentCenter = mapEvent.center;
-                              mapController.move(currentCenter, currentZoom);
 
                               var northEastLatitude = mapController.bounds!.northEast.latitude;
                               var northWestLatitude = mapController.bounds!.northWest.latitude;
@@ -245,7 +244,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                             });
                           }
 
-                          if (mapEvent is MapEventMoveEnd) {
+                          if (mapEvent is MapEventMoveEnd || mapEvent is MapEventFlingAnimationEnd) {
                             setState(() {
                               currentCenter = mapEvent.center;
 
