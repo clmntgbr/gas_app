@@ -3,6 +3,11 @@ import 'package:cool_dropdown/models/cool_dropdown_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
+import 'package:gas_app/model/get_address_cities.dart';
+import 'package:gas_app/model/get_address_departments.dart';
+import 'package:gas_app/model/get_address_postal_codes.dart';
+import 'package:gas_app/service/address_service.dart';
+import 'package:side_sheet/side_sheet.dart';
 import '../../model/gas_type.dart';
 import '../../service/gas_type_service.dart';
 import '../../constants.dart';
@@ -38,6 +43,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   LatLng currentCenter = const LatLng(48.764977, 2.358192);
 
   late List<Marker> markers = [];
+  final addressService = AddressService();
   final gasStationService = GasStationService();
   final gasTypeService = GasTypeService();
   final apiService = ApiService();
@@ -46,7 +52,11 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   bool isGasTypeLoaded = false;
   bool isDistanceLoaded = false;
 
-  late GetGasTypes gasTypes = GetGasTypes(gasTypes: [], totalItems: 0, statusCode: -1);
+  late GetGasTypes gasTypes = GetGasTypes(gasTypes: [], totalItems: 0, statusCode: 0);
+  late GetAddressCities addressCities = GetAddressCities(cities: [], totalItems: 0, statusCode: 0);
+  late GetAddressPostalCodes addressPostalCodes = GetAddressPostalCodes(postalCodes: [], totalItems: 0, statusCode: 0);
+  late GetAddressDepartments addressDepartments = GetAddressDepartments(departments: [], totalItems: 0, statusCode: 0);
+
   late String favoriteGasTypeId = '';
   String? selected;
 
@@ -56,18 +66,40 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   void initState() {
     super.initState();
 
-    apiService.getFavoriteGasType().then((value) {
-      selected = (value == 'null' || value == null ? Constants.gasTypeDefault : value);
-      isGasTypeLoaded = true;
-      if (isGasTypeLoaded && isDistanceLoaded) {
-        // markers = [];
-        getGasStationsMap(currentCenter.latitude, currentCenter.longitude, distance, selected);
-      }
-    });
+    apiService.getFavoriteGasType().then(
+      (value) {
+        selected = (value == 'null' || value == null ? Constants.gasTypeDefault : value);
+        isGasTypeLoaded = true;
+        if (isGasTypeLoaded && isDistanceLoaded) {
+          // markers = [];
+          getGasStationsMap(currentCenter.latitude, currentCenter.longitude, distance, selected);
+        }
+      },
+    );
 
-    gasTypeService.getGasTypes().then((value) {
-      gasTypes = value;
-    });
+    gasTypeService.getGasTypes().then(
+      (value) {
+        gasTypes = value;
+      },
+    );
+
+    addressService.getAddressCities().then(
+      (value) {
+        addressCities = value;
+      },
+    );
+
+    addressService.getAddressDepartments().then(
+      (value) {
+        addressDepartments = value;
+      },
+    );
+
+    addressService.getAddressPostalCodes().then(
+      (value) {
+        addressPostalCodes = value;
+      },
+    );
 
     topBarAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
@@ -153,6 +185,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                           ),
                         ),
                         getGasTypesWidget(),
+                        getGasFilters(),
                       ],
                       options: MapOptions(
                         center: currentCenter,
@@ -305,6 +338,40 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     );
   }
 
+  Widget getGasFilters() {
+    return Align(
+      alignment: Alignment.topRight,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 50, right: 13),
+        child: Container(
+          color: Colors.transparent,
+          height: 45,
+          width: 45,
+          child: ElevatedButton(
+            style: ButtonStyle(
+              padding: MaterialStateProperty.all(EdgeInsets.zero),
+              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(100),
+                ),
+              ),
+              iconColor: const MaterialStatePropertyAll(Colors.black),
+              alignment: Alignment.center,
+              backgroundColor: const MaterialStatePropertyAll<Color>(Colors.white),
+            ),
+            onPressed: () => SideSheet.right(
+              body: Column(
+                children: [Text("Body"), Text("Body"), Text("Body"), Text("Body")],
+              ),
+              context: context,
+            ),
+            child: const Icon(Icons.tune),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget getGasTypesWidget() {
     List<CoolDropdownItem> items = [];
     final gasTypeDropdownController = DropdownController();
@@ -345,7 +412,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     return Align(
       alignment: Alignment.topRight,
       child: Padding(
-        padding: const EdgeInsets.only(top: 50, right: 8),
+        padding: const EdgeInsets.only(top: 105, right: 0),
         child: DropdownButtonHideUnderline(
           child: CoolDropdown(
             controller: gasTypeDropdownController,

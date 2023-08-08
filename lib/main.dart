@@ -1,15 +1,17 @@
 import 'screen/base/base_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:io';
 
 void main() {
-  runApp(
-    const AlertingApp(),
-  );
+  HttpOverrides.global = MyHttpOverrides();
+
+  HttpOverrides.global = MyHttpOverrides();
+  runApp(const GasApp());
 }
 
-class AlertingApp extends StatelessWidget {
-  const AlertingApp({super.key});
+class GasApp extends StatelessWidget {
+  const GasApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,5 +27,12 @@ class AlertingApp extends StatelessWidget {
       ),
       home: const BaseScreen(),
     );
+  }
+}
+
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
   }
 }
