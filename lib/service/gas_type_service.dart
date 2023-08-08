@@ -17,7 +17,7 @@ class GasTypeService {
       },
     );
 
-    debugPrint('GET $url status code is ${response.statusCode}');
+    debugPrint('*** GET $url status code is ${response.statusCode}');
 
     GetGasTypes model = gasTypesFromJson(
       response.body.toString(),

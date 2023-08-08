@@ -19,7 +19,7 @@ class AddressService {
       },
     );
 
-    debugPrint('GET $url status code is ${response.statusCode}');
+    debugPrint('*** GET $url status code is ${response.statusCode}');
 
     GetAddressCities model = getAddressCitiesFromJson(
       response.body.toString(),
@@ -43,7 +43,7 @@ class AddressService {
       },
     );
 
-    debugPrint('GET $url status code is ${response.statusCode}');
+    debugPrint('*** GET $url status code is ${response.statusCode}');
 
     GetAddressDepartments model = getAddressDepartmentsFromJson(
       response.body.toString(),
@@ -67,7 +67,7 @@ class AddressService {
       },
     );
 
-    debugPrint('GET $url status code is ${response.statusCode}');
+    debugPrint('*** GET $url status code is ${response.statusCode}');
 
     GetAddressPostalCodes model = getAddressPostalCodesFromJson(
       response.body.toString(),

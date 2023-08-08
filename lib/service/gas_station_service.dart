@@ -20,7 +20,7 @@ class GasStationService {
       },
     );
 
-    debugPrint('GET $url status code is ${response.statusCode}');
+    debugPrint('*** GET $url status code is ${response.statusCode}');
 
     GetGasStationsMap model = gasStationsMapFromJson(
       response.body.toString(),
