@@ -55,13 +55,16 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   bool isAddressCitiesLoaded = false;
   bool isAddressDepartmentsLoaded = false;
   bool hasFiltersChanged = false;
+  bool hasFiltersDistance = false;
 
+  List<int> addressDistance = [500, 1000, 2000, 3000, 4000, 5000, 10000, 20000, 50000, 75000, 100000, 150000, 200000];
   List<AddressFilter> addressCities = [];
   List<AddressFilter> addressDepartments = [];
   List<CoolDropdownItem> gasTypes = [];
 
   CoolDropdownItem? selectedGasTypes;
   String? selectedGasTypeUuid;
+  int? selectedAddressDistance;
   AddressFilter? selectedAddressCity;
   AddressFilter? selectedAddressDepartment;
 
@@ -76,7 +79,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
         selectedGasTypeUuid = (value == 'null' || value == null ? Constants.gasTypeDefault : value);
         isGasTypeLoaded = true;
         if (isGasTypeLoaded && isDistanceLoaded) {
-          getGasStationsMap(currentCenter.latitude, currentCenter.longitude, distance, selectedGasTypeUuid);
+          getGasStationsMap(currentCenter.latitude, currentCenter.longitude, selectedGasTypeUuid);
         }
       },
     );
@@ -169,12 +172,13 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     );
   }
 
-  getGasStationsMap(double latitude, double longitude, double radius, String? gasType) {
+  getGasStationsMap(double latitude, double longitude, String? gasType) {
+    debugPrint("hasFiltersDistance : $hasFiltersDistance");
     streamSubscription = gasStationService
         .getGasStationsMap(
           currentCenter.latitude,
           currentCenter.longitude,
-          radius,
+          hasFiltersDistance ? (selectedAddressDistance ?? distance).toDouble() : distance,
           gasType,
           selectedAddressCity,
           selectedAddressDepartment,
@@ -246,7 +250,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                             );
                             isDistanceLoaded = true;
                             if (isGasTypeLoaded && isDistanceLoaded) {
-                              getGasStationsMap(currentCenter.latitude, currentCenter.longitude, distance, selectedGasTypeUuid);
+                              getGasStationsMap(currentCenter.latitude, currentCenter.longitude, selectedGasTypeUuid);
                             }
                           });
                         },
@@ -308,7 +312,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
 
                               if (isGasTypeLoaded && isDistanceLoaded) {
                                 streamSubscription?.cancel();
-                                getGasStationsMap(currentCenter.latitude, currentCenter.longitude, distance, selectedGasTypeUuid);
+                                getGasStationsMap(currentCenter.latitude, currentCenter.longitude, selectedGasTypeUuid);
                               }
                             });
                           }
@@ -321,7 +325,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
 
                               if (isGasTypeLoaded && isDistanceLoaded) {
                                 streamSubscription?.cancel();
-                                getGasStationsMap(currentCenter.latitude, currentCenter.longitude, distance, selectedGasTypeUuid);
+                                getGasStationsMap(currentCenter.latitude, currentCenter.longitude, selectedGasTypeUuid);
                               }
                             });
                           }
@@ -414,6 +418,10 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                     const SizedBox(
                       height: 20,
                     ),
+                    getAddressDistanceFilter(),
+                    const SizedBox(
+                      height: 20,
+                    ),
                     getClearFilterButton(),
                   ],
                 ),
@@ -424,7 +432,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                   markers = [];
                 });
 
-                getGasStationsMap(currentCenter.latitude, currentCenter.longitude, distance, selectedGasTypeUuid);
+                getGasStationsMap(currentCenter.latitude, currentCenter.longitude, selectedGasTypeUuid);
               }
             },
             child: const Icon(Icons.tune),
@@ -489,6 +497,66 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
             onChanged: (value) {
               setState(() {
                 selectedAddressCity = value;
+                hasFiltersChanged = true;
+              });
+            },
+            popupProps: PopupPropsMultiSelection.modalBottomSheet(
+              searchFieldProps: TextFieldProps(
+                controller: userEditTextController,
+                decoration: InputDecoration(
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      userEditTextController.clear();
+                    },
+                  ),
+                ),
+              ),
+              showSearchBox: true,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget getAddressDistanceFilter() {
+    final userEditTextController = TextEditingController();
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 10, right: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Text(
+            "Filtrer par distance",
+            style: GoogleFonts.roboto(
+              fontWeight: FontWeight.bold,
+              color: const Color.fromARGB(255, 122, 122, 122),
+            ),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          DropdownSearch<int>(
+            clearButtonProps: const ClearButtonProps(isVisible: true),
+            items: addressDistance,
+            itemAsString: (item) {
+              return "${item / 1000} km";
+            },
+            selectedItem: selectedAddressDistance,
+            onChanged: (value) {
+              setState(() {
+                if (value == null) {
+                  hasFiltersDistance = false;
+                }
+
+                if (value != null) {
+                  hasFiltersDistance = true;
+                }
+
+                selectedAddressDistance = value;
                 hasFiltersChanged = true;
               });
             },
@@ -587,7 +655,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                 if (isGasTypeLoaded && isDistanceLoaded) {
                   markers = [];
                   streamSubscription?.cancel();
-                  getGasStationsMap(currentCenter.latitude, currentCenter.longitude, distance, uuid);
+                  getGasStationsMap(currentCenter.latitude, currentCenter.longitude, uuid);
                 }
               });
               gasTypeDropdownController.close();
