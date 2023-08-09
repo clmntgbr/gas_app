@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../model/get_address_cities.dart';
 import '../model/get_address_departments.dart';
-import '../model/get_address_postal_codes.dart';
 import 'package:http/http.dart' as http;
 import '../constants.dart';
 
