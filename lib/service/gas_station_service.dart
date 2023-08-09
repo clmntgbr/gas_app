@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
-
 import '../constants.dart';
+import '../model/address_filter.dart';
 import '../model/get_gas_stations_map.dart';
 
 class GasStationService {
-  Future<GetGasStationsMap> getGasStationsMap(double latitude, double longitude, double radius, String? gasType) async {
+  Future<GetGasStationsMap> getGasStationsMap(double latitude, double longitude, double radius, String? gasType, List selectedAddressCities) async {
+    List filterCity = getAddressCitiesFilter(selectedAddressCities);
+
     String url =
-        '${Constants.baseApiUrl}${Constants.gasStationsMapEndpoint}?latitude=$latitude&longitude=$longitude&radius=$radius&gasTypeUuid=$gasType';
+        '${Constants.baseApiUrl}${Constants.gasStationsMapEndpoint}?latitude=$latitude&longitude=$longitude&radius=$radius&gasTypeUuid=$gasType&filter_city=$filterCity';
 
     debugPrint('GET $url');
 
@@ -29,5 +30,9 @@ class GasStationService {
 
     model.statusCode = response.statusCode;
     return model;
+  }
+
+  List getAddressCitiesFilter(List selectedAddressCities) {
+    return selectedAddressCities.map((e) => e.code).toList();
   }
 }
