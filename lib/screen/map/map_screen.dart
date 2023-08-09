@@ -3,7 +3,7 @@ import 'package:cool_dropdown/models/cool_dropdown_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
-import 'package:gas_app/service/address_service.dart';
+import '../../service/address_service.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:side_sheet/side_sheet.dart';
 import '../../model/address_filter.dart';

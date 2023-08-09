@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../constants.dart';
-import '../model/address_filter.dart';
 import '../model/get_gas_stations_map.dart';
 
 class GasStationService {

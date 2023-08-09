@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:gas_app/model/address_filter.dart';
+import 'address_filter.dart';
 
 GetAddressDepartments getAddressDepartmentsFromJson(String str, int statusCode) => GetAddressDepartments.fromJson(json.decode(str), statusCode);
 

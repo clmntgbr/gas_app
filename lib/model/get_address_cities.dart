@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:gas_app/model/address_filter.dart';
+import 'address_filter.dart';
 
 GetAddressCities getAddressCitiesFromJson(String str, int statusCode) => GetAddressCities.fromJson(json.decode(str), statusCode);
 

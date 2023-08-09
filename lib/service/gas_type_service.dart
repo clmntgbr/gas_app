@@ -1,7 +1,8 @@
-import '../constants.dart';
-import '../model/get_gas_types.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+
+import '../constants.dart';
+import '../model/get_gas_types.dart';
 
 class GasTypeService {
   Future<GetGasTypes> getGasTypes() async {
