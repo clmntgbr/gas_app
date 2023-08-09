@@ -53,28 +53,4 @@ class AddressService {
     model.statusCode = response.statusCode;
     return model;
   }
-
-  Future<GetAddressPostalCodes> getAddressPostalCodes() async {
-    String url = '${Constants.baseApiUrl}${Constants.addressEndpoint}/postal_codes';
-
-    debugPrint('GET $url');
-
-    http.Response response = await http.get(
-      Uri.parse(url),
-      headers: {
-        'Content-Type': 'application/ld+json',
-        'Accept': 'application/ld+json',
-      },
-    );
-
-    debugPrint('*** GET $url status code is ${response.statusCode}');
-
-    GetAddressPostalCodes model = getAddressPostalCodesFromJson(
-      response.body.toString(),
-      response.statusCode,
-    );
-
-    model.statusCode = response.statusCode;
-    return model;
-  }
 }

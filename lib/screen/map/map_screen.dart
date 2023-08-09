@@ -1,8 +1,11 @@
 import 'package:cool_dropdown/cool_dropdown.dart';
 import 'package:cool_dropdown/models/cool_dropdown_item.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:hexcolor/hexcolor.dart';
 import '../../service/address_service.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:side_sheet/side_sheet.dart';
@@ -53,19 +56,16 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   bool isDistanceLoaded = false;
   bool isAddressCitiesLoaded = false;
   bool isAddressDepartmentsLoaded = false;
-  bool isAddressPostalCodesLoaded = false;
-  bool hasFilters = false;
+  bool hasFiltersChanged = false;
 
-  List<MultiSelectItem> addressCities = [];
-  List<DropdownMenuItem> addressPostalCodes = [];
-  List<DropdownMenuItem> addressDepartments = [];
+  List<AddressFilter> addressCities = [];
+  List<AddressFilter> addressDepartments = [];
   List<CoolDropdownItem> gasTypes = [];
 
   CoolDropdownItem? selectedGasTypes;
   String? selectedGasTypeUuid;
-  List selectedAddressCities = [];
-  List selectedAddressPostalCodes = [];
-  List selectedAddressDepartments = [];
+  AddressFilter? selectedAddressCity;
+  AddressFilter? selectedAddressDepartment;
 
   StreamSubscription<dynamic>? streamSubscription;
 
@@ -78,7 +78,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
         selectedGasTypeUuid = (value == 'null' || value == null ? Constants.gasTypeDefault : value);
         isGasTypeLoaded = true;
         if (isGasTypeLoaded && isDistanceLoaded) {
-          getGasStationsMap(currentCenter.latitude, currentCenter.longitude, distance, selectedGasTypeUuid, selectedAddressCities);
+          getGasStationsMap(currentCenter.latitude, currentCenter.longitude, distance, selectedGasTypeUuid);
         }
       },
     );
@@ -114,7 +114,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     addressService.getAddressCities().then(
       (value) {
         addressCities = value.cities.map((e) {
-          return MultiSelectItem<AddressFilter>(e, toBeginningOfSentenceCase("${e.name} - ${e.code}") ?? '');
+          return AddressFilter(name: e.name, code: e.code);
         }).toList();
         isAddressCitiesLoaded = true;
       },
@@ -123,22 +123,9 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     addressService.getAddressDepartments().then(
       (value) {
         addressDepartments = value.departments.map((e) {
-          return DropdownMenuItem(
-            child: Text(e.name),
-          );
+          return AddressFilter(name: e.name, code: e.code);
         }).toList();
         isAddressDepartmentsLoaded = true;
-      },
-    );
-
-    addressService.getAddressPostalCodes().then(
-      (value) {
-        addressPostalCodes = value.postalCodes.map((e) {
-          return DropdownMenuItem(
-            child: Text(e.code),
-          );
-        }).toList();
-        isAddressPostalCodesLoaded = true;
       },
     );
 
@@ -184,9 +171,16 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     );
   }
 
-  getGasStationsMap(double latitude, double longitude, double radius, String? gasType, List selectedAddressCities) {
+  getGasStationsMap(double latitude, double longitude, double radius, String? gasType) {
     streamSubscription = gasStationService
-        .getGasStationsMap(currentCenter.latitude, currentCenter.longitude, radius, gasType, selectedAddressCities)
+        .getGasStationsMap(
+          currentCenter.latitude,
+          currentCenter.longitude,
+          radius,
+          gasType,
+          selectedAddressCity,
+          selectedAddressDepartment,
+        )
         .asStream()
         .listen((data) {
       markers = [];
@@ -196,7 +190,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
         );
       }
       setState(() {
-        hasFilters = false;
+        hasFiltersChanged = false;
       });
     });
   }
@@ -254,8 +248,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                             );
                             isDistanceLoaded = true;
                             if (isGasTypeLoaded && isDistanceLoaded) {
-                              getGasStationsMap(
-                                  currentCenter.latitude, currentCenter.longitude, distance, selectedGasTypeUuid, selectedAddressCities);
+                              getGasStationsMap(currentCenter.latitude, currentCenter.longitude, distance, selectedGasTypeUuid);
                             }
                           });
                         },
@@ -317,8 +310,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
 
                               if (isGasTypeLoaded && isDistanceLoaded) {
                                 streamSubscription?.cancel();
-                                getGasStationsMap(
-                                    currentCenter.latitude, currentCenter.longitude, distance, selectedGasTypeUuid, selectedAddressCities);
+                                getGasStationsMap(currentCenter.latitude, currentCenter.longitude, distance, selectedGasTypeUuid);
                               }
                             });
                           }
@@ -331,8 +323,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
 
                               if (isGasTypeLoaded && isDistanceLoaded) {
                                 streamSubscription?.cancel();
-                                getGasStationsMap(
-                                    currentCenter.latitude, currentCenter.longitude, distance, selectedGasTypeUuid, selectedAddressCities);
+                                getGasStationsMap(currentCenter.latitude, currentCenter.longitude, distance, selectedGasTypeUuid);
                               }
                             });
                           }
@@ -386,7 +377,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   }
 
   Widget getGasFilters() {
-    if (!isAddressCitiesLoaded && !isAddressDepartmentsLoaded && !isAddressPostalCodesLoaded) {
+    if (!isAddressCitiesLoaded && !isAddressDepartmentsLoaded) {
       return Container();
     }
 
@@ -412,28 +403,30 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
             ),
             onPressed: () async {
               await SideSheet.right(
-                // barrierDismissible: false,
                 body: Column(
                   children: [
                     const SizedBox(
-                      height: 100,
+                      height: 60,
                     ),
-                    getAddressCitiesFilter()
+                    getAddressCitiesDropdownFilter(),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    getAddressDepartmentsDropdownFilter(),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    getClearFilterButton(),
                   ],
                 ),
                 context: context,
               );
-              if (hasFilters) {
+              if (hasFiltersChanged) {
                 setState(() {
                   markers = [];
                 });
-                getGasStationsMap(
-                  currentCenter.latitude,
-                  currentCenter.longitude,
-                  distance,
-                  selectedGasTypeUuid,
-                  selectedAddressCities,
-                );
+
+                getGasStationsMap(currentCenter.latitude, currentCenter.longitude, distance, selectedGasTypeUuid);
               }
             },
             child: const Icon(Icons.tune),
@@ -443,63 +436,132 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget getAddressCitiesFilter() {
+  Widget getClearFilterButton() {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(Radius.circular(5)),
+        border: Border.all(
+          color: const Color.fromARGB(255, 122, 122, 122),
+        ),
+      ),
+      child: TextButton(
+        child: Text(
+          "Supprimer les filtres",
+          style: GoogleFonts.roboto(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+            color: const Color.fromARGB(255, 122, 122, 122),
+          ),
+        ),
+        onPressed: () {
+          setState(() {
+            selectedAddressCity = null;
+          });
+        },
+      ),
+    );
+  }
+
+  Widget getAddressCitiesDropdownFilter() {
+    final userEditTextController = TextEditingController();
+
     return Padding(
       padding: const EdgeInsets.only(left: 10, right: 10),
-      child: MultiSelectBottomSheetField(
-        items: addressCities,
-        separateSelectedItems: true,
-        searchable: true,
-        initialValue: selectedAddressCities,
-        title: const Text("Villes"),
-        selectedColor: Colors.black,
-        decoration: BoxDecoration(
-          color: Colors.transparent,
-          borderRadius: const BorderRadius.all(Radius.circular(10)),
-          border: Border.all(
-            color: Colors.black,
-            width: 1,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Text(
+            "Filtrer par ville",
+            style: GoogleFonts.roboto(
+              fontWeight: FontWeight.bold,
+              color: const Color.fromARGB(255, 122, 122, 122),
+            ),
           ),
-        ),
-        buttonIcon: const Icon(
-          Icons.location_city,
-          color: Colors.black,
-        ),
-        confirmText: const Text(
-          'Confirmer',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 16,
+          const SizedBox(
+            height: 10,
           ),
-        ),
-        cancelText: const Text(
-          'Annuler',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 16,
+          DropdownSearch<AddressFilter>(
+            clearButtonProps: const ClearButtonProps(isVisible: true),
+            items: addressCities,
+            itemAsString: (item) {
+              return toBeginningOfSentenceCase("${item.name} - ${item.code}") ?? "";
+            },
+            selectedItem: selectedAddressCity,
+            onChanged: (value) {
+              setState(() {
+                selectedAddressCity = value;
+                hasFiltersChanged = true;
+              });
+            },
+            popupProps: PopupPropsMultiSelection.modalBottomSheet(
+              searchFieldProps: TextFieldProps(
+                controller: userEditTextController,
+                decoration: InputDecoration(
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      userEditTextController.clear();
+                    },
+                  ),
+                ),
+              ),
+              showSearchBox: true,
+            ),
           ),
-        ),
-        buttonText: const Text(
-          "Filtrer par ville",
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 16,
-          ),
-        ),
-        onConfirm: (results) {
-          if (results.isEmpty) {
-            setState(() {
-              hasFilters = false;
-            });
-          }
+        ],
+      ),
+    );
+  }
 
-          if (results.isNotEmpty) {
-            setState(() {
-              hasFilters = true;
-              selectedAddressCities = results;
-            });
-          }
-        },
+  Widget getAddressDepartmentsDropdownFilter() {
+    final userEditTextController = TextEditingController();
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 10, right: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Text(
+            "Filtrer par département",
+            style: GoogleFonts.roboto(
+              fontWeight: FontWeight.bold,
+              color: const Color.fromARGB(255, 122, 122, 122),
+            ),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          DropdownSearch<AddressFilter>(
+            clearButtonProps: const ClearButtonProps(isVisible: true),
+            items: addressDepartments,
+            itemAsString: (item) {
+              return toBeginningOfSentenceCase("${item.name} - ${item.code}") ?? "";
+            },
+            selectedItem: selectedAddressDepartment,
+            onChanged: (value) {
+              setState(() {
+                selectedAddressDepartment = value;
+                hasFiltersChanged = true;
+              });
+            },
+            popupProps: PopupPropsMultiSelection.modalBottomSheet(
+              searchFieldProps: TextFieldProps(
+                controller: userEditTextController,
+                decoration: InputDecoration(
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      userEditTextController.clear();
+                    },
+                  ),
+                ),
+              ),
+              showSearchBox: true,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -527,7 +589,7 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                 if (isGasTypeLoaded && isDistanceLoaded) {
                   markers = [];
                   streamSubscription?.cancel();
-                  getGasStationsMap(currentCenter.latitude, currentCenter.longitude, distance, uuid, selectedAddressCities);
+                  getGasStationsMap(currentCenter.latitude, currentCenter.longitude, distance, uuid);
                 }
               });
               gasTypeDropdownController.close();

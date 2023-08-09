@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../constants.dart';
+import '../model/address_filter.dart';
 import '../model/get_gas_stations_map.dart';
 
 class GasStationService {
-  Future<GetGasStationsMap> getGasStationsMap(double latitude, double longitude, double radius, String? gasType, List selectedAddressCities) async {
-    List filterCity = getAddressCitiesFilter(selectedAddressCities);
-
+  Future<GetGasStationsMap> getGasStationsMap(
+    double latitude,
+    double longitude,
+    double radius,
+    String? gasType,
+    AddressFilter? selectedAddressCities,
+    AddressFilter? selectedAddressDepartments,
+  ) async {
     String url =
-        '${Constants.baseApiUrl}${Constants.gasStationsMapEndpoint}?latitude=$latitude&longitude=$longitude&radius=$radius&gasTypeUuid=$gasType&filter_city=$filterCity';
+        '${Constants.baseApiUrl}${Constants.gasStationsMapEndpoint}?latitude=$latitude&longitude=$longitude&radius=$radius&gasTypeUuid=$gasType';
+
+    url = getAddressCitiesFilter(selectedAddressCities, url);
+    url = getAddressDepartmentsFilter(selectedAddressDepartments, url);
 
     debugPrint('GET $url');
 
@@ -31,7 +40,17 @@ class GasStationService {
     return model;
   }
 
-  List getAddressCitiesFilter(List selectedAddressCities) {
-    return selectedAddressCities.map((e) => e.code).toList();
+  String getAddressCitiesFilter(AddressFilter? selectedAddressCities, String url) {
+    if (selectedAddressCities is AddressFilter) {
+      return "$url&filter_city=${selectedAddressCities.code}";
+    }
+    return url;
+  }
+
+  String getAddressDepartmentsFilter(AddressFilter? selectedAddressDepartments, String url) {
+    if (selectedAddressDepartments is AddressFilter) {
+      return "$url&filter_department=${selectedAddressDepartments.code}";
+    }
+    return url;
   }
 }
