@@ -15,6 +15,13 @@ buildTextTitleVariation1(String text) {
   );
 }
 
+TextStyle googleFontsTextStyle({Color? color, FontWeight? fontWeight}) {
+  return GoogleFonts.raleway(
+    color: color ?? const Color.fromARGB(255, 20, 13, 13),
+    fontWeight: fontWeight ?? FontWeight.normal,
+  );
+}
+
 extension StringCasingExtension on String {
   String toCapitalized() => length > 0 ? '${this[0].toUpperCase()}${substring(1).toLowerCase()}' : '';
   String toTitleCase() => replaceAll(RegExp(' +'), ' ').split(' ').map((str) => str.toCapitalized()).join(' ');

@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'address_filter.dart';
 
 GetAddressCities getAddressCitiesFromJson(String str, int statusCode) => GetAddressCities.fromJson(json.decode(str), statusCode);

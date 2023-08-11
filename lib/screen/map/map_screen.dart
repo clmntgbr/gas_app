@@ -20,6 +20,8 @@ import '../../widget/scale_layer.dart';
 import 'dart:async';
 import 'package:intl/intl.dart' show toBeginningOfSentenceCase;
 
+import '../../widget/shared.dart';
+
 class MapScreen extends StatefulWidget {
   const MapScreen({Key? key, this.animationController}) : super(key: key);
 
@@ -419,10 +421,6 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                       height: 20,
                     ),
                     getAddressDistanceFilter(),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    getClearFilterButton(),
                   ],
                 ),
                 context: context,
@@ -442,32 +440,6 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget getClearFilterButton() {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(Radius.circular(5)),
-        border: Border.all(
-          color: const Color.fromARGB(255, 122, 122, 122),
-        ),
-      ),
-      child: TextButton(
-        child: Text(
-          "Supprimer les filtres",
-          style: GoogleFonts.roboto(
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
-            color: const Color.fromARGB(255, 122, 122, 122),
-          ),
-        ),
-        onPressed: () {
-          setState(() {
-            selectedAddressCity = null;
-          });
-        },
-      ),
-    );
-  }
-
   Widget getAddressCitiesDropdownFilter() {
     final userEditTextController = TextEditingController();
 
@@ -479,19 +451,36 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
         children: [
           Text(
             "Filtrer par ville",
-            style: GoogleFonts.roboto(
-              fontWeight: FontWeight.bold,
-              color: const Color.fromARGB(255, 122, 122, 122),
+            style: googleFontsTextStyle(
+              fontWeight: FontWeight.w400,
             ),
           ),
           const SizedBox(
             height: 10,
           ),
           DropdownSearch<AddressFilter>(
-            clearButtonProps: const ClearButtonProps(isVisible: true),
+            dropdownDecoratorProps: DropDownDecoratorProps(
+              baseStyle: googleFontsTextStyle(),
+            ),
+            clearButtonProps: const ClearButtonProps(
+              isVisible: true,
+              color: Color.fromARGB(255, 159, 159, 159),
+            ),
             items: addressCities,
-            itemAsString: (item) {
-              return toBeginningOfSentenceCase("${item.name} - ${item.code}") ?? "";
+            dropdownBuilder: (context, selectedItem) {
+              if (selectedItem != null) {
+                return Text(
+                  toBeginningOfSentenceCase("${selectedItem.name}, ${selectedItem.code}") ?? "",
+                  style: googleFontsTextStyle(fontWeight: FontWeight.bold),
+                );
+              }
+              return const Align(
+                alignment: Alignment.centerLeft,
+                child: Icon(
+                  Icons.tune,
+                  color: Color.fromARGB(255, 159, 159, 159),
+                ),
+              );
             },
             selectedItem: selectedAddressCity,
             onChanged: (value) {
@@ -501,9 +490,39 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
               });
             },
             popupProps: PopupPropsMultiSelection.modalBottomSheet(
+              modalBottomSheetProps: const ModalBottomSheetProps(
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(color: Color(0xFF2A8068)),
+                  borderRadius: BorderRadius.all(Radius.circular(0)),
+                ),
+              ),
+              itemBuilder: (context, item, isSelected) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: selectedAddressCity?.code == item.code ? const Color.fromARGB(255, 221, 221, 221) : Colors.transparent,
+                    border: const Border(
+                      bottom: BorderSide(color: Color.fromARGB(255, 179, 179, 179), width: 1.0),
+                    ),
+                  ),
+                  padding: const EdgeInsets.only(left: 15, right: 15, top: 20, bottom: 20),
+                  child: Text(
+                    toBeginningOfSentenceCase("${item.name}, ${item.code}") ?? "",
+                    style: googleFontsTextStyle(
+                      fontWeight: selectedAddressCity?.code == item.code ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                );
+              },
               searchFieldProps: TextFieldProps(
                 controller: userEditTextController,
+                style: googleFontsTextStyle(),
                 decoration: InputDecoration(
+                  border: const OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Color.fromARGB(255, 179, 179, 179),
+                      width: 1.0,
+                    ),
+                  ),
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.clear),
                     onPressed: () {
@@ -531,19 +550,36 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
         children: [
           Text(
             "Filtrer par distance",
-            style: GoogleFonts.roboto(
-              fontWeight: FontWeight.bold,
-              color: const Color.fromARGB(255, 122, 122, 122),
+            style: googleFontsTextStyle(
+              fontWeight: FontWeight.w400,
             ),
           ),
           const SizedBox(
             height: 10,
           ),
           DropdownSearch<int>(
-            clearButtonProps: const ClearButtonProps(isVisible: true),
+            dropdownDecoratorProps: DropDownDecoratorProps(
+              baseStyle: googleFontsTextStyle(),
+            ),
+            clearButtonProps: const ClearButtonProps(
+              isVisible: true,
+              color: Color.fromARGB(255, 159, 159, 159),
+            ),
             items: addressDistance,
-            itemAsString: (item) {
-              return "${item / 1000} km";
+            dropdownBuilder: (context, selectedItem) {
+              if (selectedItem != null) {
+                return Text(
+                  "${selectedItem / 1000} km",
+                  style: googleFontsTextStyle(fontWeight: FontWeight.bold),
+                );
+              }
+              return const Align(
+                alignment: Alignment.centerLeft,
+                child: Icon(
+                  Icons.tune,
+                  color: Color.fromARGB(255, 159, 159, 159),
+                ),
+              );
             },
             selectedItem: selectedAddressDistance,
             onChanged: (value) {
@@ -561,9 +597,39 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
               });
             },
             popupProps: PopupPropsMultiSelection.modalBottomSheet(
+              modalBottomSheetProps: const ModalBottomSheetProps(
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(color: Color(0xFF2A8068)),
+                  borderRadius: BorderRadius.all(Radius.circular(0)),
+                ),
+              ),
+              itemBuilder: (context, item, isSelected) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: selectedAddressDistance == item ? const Color.fromARGB(255, 221, 221, 221) : Colors.transparent,
+                    border: const Border(
+                      bottom: BorderSide(color: Color.fromARGB(255, 179, 179, 179), width: 1.0),
+                    ),
+                  ),
+                  padding: const EdgeInsets.only(left: 15, right: 15, top: 20, bottom: 20),
+                  child: Text(
+                    "${item / 1000} km",
+                    style: googleFontsTextStyle(
+                      fontWeight: selectedAddressDistance == item ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                );
+              },
               searchFieldProps: TextFieldProps(
                 controller: userEditTextController,
+                style: googleFontsTextStyle(),
                 decoration: InputDecoration(
+                  border: const OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Color.fromARGB(255, 179, 179, 179),
+                      width: 1.0,
+                    ),
+                  ),
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.clear),
                     onPressed: () {
@@ -591,19 +657,36 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
         children: [
           Text(
             "Filtrer par département",
-            style: GoogleFonts.roboto(
-              fontWeight: FontWeight.bold,
-              color: const Color.fromARGB(255, 122, 122, 122),
+            style: googleFontsTextStyle(
+              fontWeight: FontWeight.w400,
             ),
           ),
           const SizedBox(
             height: 10,
           ),
           DropdownSearch<AddressFilter>(
-            clearButtonProps: const ClearButtonProps(isVisible: true),
+            dropdownDecoratorProps: DropDownDecoratorProps(
+              baseStyle: googleFontsTextStyle(),
+            ),
+            clearButtonProps: const ClearButtonProps(
+              isVisible: true,
+              color: Color.fromARGB(255, 159, 159, 159),
+            ),
             items: addressDepartments,
-            itemAsString: (item) {
-              return toBeginningOfSentenceCase("${item.name} - ${item.code}") ?? "";
+            dropdownBuilder: (context, selectedItem) {
+              if (selectedItem != null) {
+                return Text(
+                  toBeginningOfSentenceCase("${selectedItem.name}, ${selectedItem.code}") ?? "",
+                  style: googleFontsTextStyle(fontWeight: FontWeight.bold),
+                );
+              }
+              return const Align(
+                alignment: Alignment.centerLeft,
+                child: Icon(
+                  Icons.tune,
+                  color: Color.fromARGB(255, 159, 159, 159),
+                ),
+              );
             },
             selectedItem: selectedAddressDepartment,
             onChanged: (value) {
@@ -613,9 +696,39 @@ class MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
               });
             },
             popupProps: PopupPropsMultiSelection.modalBottomSheet(
+              modalBottomSheetProps: const ModalBottomSheetProps(
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(color: Color(0xFF2A8068)),
+                  borderRadius: BorderRadius.all(Radius.circular(0)),
+                ),
+              ),
+              itemBuilder: (context, item, isSelected) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: selectedAddressDepartment?.code == item.code ? const Color.fromARGB(255, 221, 221, 221) : Colors.transparent,
+                    border: const Border(
+                      bottom: BorderSide(color: Color.fromARGB(255, 179, 179, 179), width: 1.0),
+                    ),
+                  ),
+                  padding: const EdgeInsets.only(left: 15, right: 15, top: 20, bottom: 20),
+                  child: Text(
+                    toBeginningOfSentenceCase("${item.name}, ${item.code}") ?? "",
+                    style: googleFontsTextStyle(
+                      fontWeight: selectedAddressDepartment?.code == item.code ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                );
+              },
               searchFieldProps: TextFieldProps(
                 controller: userEditTextController,
+                style: googleFontsTextStyle(),
                 decoration: InputDecoration(
+                  border: const OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Color.fromARGB(255, 179, 179, 179),
+                      width: 1.0,
+                    ),
+                  ),
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.clear),
                     onPressed: () {

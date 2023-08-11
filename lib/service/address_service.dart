@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+import '../constants.dart';
 import '../model/get_address_cities.dart';
 import '../model/get_address_departments.dart';
-import 'package:http/http.dart' as http;
-import '../constants.dart';
 
 class AddressService {
   Future<GetAddressCities> getAddressCities() async {

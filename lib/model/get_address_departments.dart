@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'address_filter.dart';
 
 GetAddressDepartments getAddressDepartmentsFromJson(String str, int statusCode) => GetAddressDepartments.fromJson(json.decode(str), statusCode);

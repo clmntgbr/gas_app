@@ -1,10 +1,9 @@
 import 'dart:convert';
 
-import 'gas_station_brand.dart';
-
 import 'address.dart';
 import 'gas_price.dart';
 import 'gas_service.dart';
+import 'gas_station_brand.dart';
 import 'google_place.dart';
 
 GasStation getGasStationFromJson(String str) => GasStation.fromJson(json.decode(str));
